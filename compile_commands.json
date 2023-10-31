@@ -1,0 +1,12 @@
+[
+{
+  "directory": "/home/seanleishman/University/cg/cw2/out/build/x64-clang-linux-debug",
+  "command": "/usr/bin/clang++ -I/home/seanleishman/University/cg/cw2/include -std=gnu++17 -o CMakeFiles/main.dir/main.cpp.o -c /home/seanleishman/University/cg/cw2/main.cpp",
+  "file": "/home/seanleishman/University/cg/cw2/main.cpp"
+},
+{
+  "directory": "/home/seanleishman/University/cg/cw2/out/build/x64-clang-linux-debug",
+  "command": "/usr/bin/clang++ -I/home/seanleishman/University/cg/cw2/include -std=gnu++17 -o src/CMakeFiles/raytracer_lib.dir/raytracer.cpp.o -c /home/seanleishman/University/cg/cw2/src/raytracer.cpp",
+  "file": "/home/seanleishman/University/cg/cw2/src/raytracer.cpp"
+}
+]
