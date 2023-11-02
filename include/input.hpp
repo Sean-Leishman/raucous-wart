@@ -1,19 +1,53 @@
+#pragma once
+
+#include <json.hpp>
+
 #include <fstream>
 #include <iostream>
-#include <json.hpp>
+#include <string>
 
 class JSONParser
 {
   private:
-  nlohmann::json jsonData;
+  nlohmann::json json_data;
 
   public:
-  JSONParser(const std::string& filename)
+  JSONParser();
+  JSONParser(const std::string& filename);
+
+  template <typename T>
+  T get(const std::string& key) const
   {
-    std::ifstream file(filename);
-    if (file.is_open())
+    if (json_data.contains(key))
     {
-      file >> jsonData;
+      return json_data.at(key).get<T>();
     }
+    throw std::runtime_error("Key not found");
+  };
+
+  template <typename T>
+  T getImpl(const nlohmann::json& json)
+  {
+    return json;
   }
+
+  template <typename T, typename... Keys>
+  T getImpl(const nlohmann::json& json, const std::string& key1, Keys... keys)
+  {
+    std::cout << key1 << "\n";
+    const auto& next_json = json.at(key1);
+    return getImpl<T>(next_json, keys...);
+  }
+
+  template <typename T, typename... Keys>
+  T get(Keys... keys)
+  {
+    return getImpl<T>(json_data, keys...);
+  }
+
+  bool contains(const std::string& key) const;
+
+  void print() const;
+
+  int read_file(const std::string& filename);
 };
