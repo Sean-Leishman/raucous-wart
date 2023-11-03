@@ -15,4 +15,8 @@ PRenderHole::PRenderHole()
 PRenderHole::PRenderHole(int width, int height, Vec3 position, Vec3 lookAt,
                          Vec3 upVector, float fov, float exposure)
     : width(width), height(height), position(position), lookAt(lookAt),
-      upVector(upVector), fov(fov), exposure(exposure){};
+      upVector(upVector), fov(fov), exposure(exposure){
+    forward = (eye-lookAt).normalize();
+    right = upVector.cross(w).normalize();
+    up = w.cross(right);
+      };
