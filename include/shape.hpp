@@ -1,5 +1,8 @@
 #pragma once
 
+#include "intersection.hpp"
+#include "ray.hpp"
+#include "shape.hpp"
 #include "vector.hpp"
 
 class Shape
@@ -7,18 +10,23 @@ class Shape
   private:
   public:
   virtual ~Shape(){};
+
+  virtual bool intersect(const Ray& ray, float tmin, float tmax,
+                         Intersection& intersection) const = 0;
 };
 
 class Sphere : public Shape
 {
   private:
   Vec3 center;
-  float radius;
+  double radius;
 
   public:
   Sphere();
   Sphere(Vec3, float);
   Sphere(float, float, float, float);
+
+  bool intersect(const Ray&, float, float, Intersection&) const override;
 };
 
 class Cylinder : public Shape
@@ -32,6 +40,8 @@ class Cylinder : public Shape
   public:
   Cylinder();
   Cylinder(Vec3, Vec3, float, float);
+
+  bool intersect(const Ray& ray, float tmin, float tmax, Intersection& intersection) const override;
 };
 
 class Triangle : public Shape
@@ -44,4 +54,6 @@ class Triangle : public Shape
   public:
   Triangle();
   Triangle(Vec3, Vec3, Vec3);
+
+  bool intersect(const Ray& ray, float tmin, float tmax, Intersection& intersection) const override;
 };

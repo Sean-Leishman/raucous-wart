@@ -13,6 +13,10 @@ PPMImage::PPMImage(int width, int height, int max_color_value)
 void PPMImage::set_pixel(int x, int y, int r, int g, int b)
 {
   PPMColor color = PPMColor{r, g, b};
+  set_pixel(x,y , color);
+}
+
+void PPMImage::set_pixel(int x, int y, PPMColor color){
   if (x < 0 || x >= width || y < 0 || y >= height)
     return;
   data[y][x] = color;

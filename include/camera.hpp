@@ -1,5 +1,6 @@
 #pragma once
 
+#include "ray.hpp"
 #include "vector.hpp"
 
 class Camera
@@ -22,7 +23,14 @@ class PRenderHole : public Camera
   Vec3 up;
   Vec3 forward;
 
+  float aspect;
+
+  float half_height;
+  float half_width;
+
   public:
   PRenderHole();
   PRenderHole(int, int, Vec3, Vec3, Vec3, float, float);
+
+  Ray compute_ray(float, float);
 };

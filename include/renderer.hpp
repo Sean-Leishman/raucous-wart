@@ -4,6 +4,7 @@
 
 #include "camera.hpp"
 #include "image.hpp"
+#include "ray.hpp"
 #include "scene.hpp"
 
 enum RenderMode
@@ -14,13 +15,20 @@ enum RenderMode
 class Renderer
 {
   private:
-  Camera camera;
+  int image_width;
+  int image_height;
+
+  PRenderHole camera;
   RenderMode render_mode;
   Scene scene;
+  PPMImage image;
 
   JSONParser parser;
 
   public:
   Renderer();
   int load_file(const std::string&);
+
+  void render_frame();
+  PPMColor trace_ray(Ray ray);
 };

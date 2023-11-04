@@ -1,7 +1,11 @@
 #pragma once
 
+#include "intersection.hpp"
+#include "ray.hpp"
 #include "shape.hpp"
+#include "vector.hpp"
 
+#include <memory>
 #include <vector>
 
 struct BackgroundColor
@@ -15,9 +19,12 @@ class Scene
 {
   private:
   BackgroundColor bg_color;
-  std::vector<Shape> shapes;
 
   public:
+  std::vector<std::shared_ptr<Shape>> shapes;
+
   Scene();
-  void add_shape(Shape shape);
+  void add_shape(std::shared_ptr<Shape> shape);
+
+  bool intersect(Ray ray, Intersection& hit_info);
 };

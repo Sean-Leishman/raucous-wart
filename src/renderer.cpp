@@ -5,8 +5,31 @@
 #include "shape.hpp"
 
 #include "json.hpp"
+#include <memory>
 
 Renderer::Renderer(){};
+
+void Renderer::render_frame()
+{
+  for (int x = 0; x < image_width; ++x)
+  {
+    for (int y = 0; y < image_height; ++y)
+    {
+      Ray ray = camera.compute_ray((float)x, (float)y);
+      PPMColor color = trace_ray(ray);
+      image.set_pixel(x, y, color);
+    }
+  }
+}
+
+PPMColor Renderer::trace_ray(Ray ray)
+{
+  Intersection hit_info;
+
+  if (scene.intersect(ray, hit_info))
+  {
+  }
+}
 
 int Renderer::load_file(const std::string& filename)
 {
@@ -16,8 +39,11 @@ int Renderer::load_file(const std::string& filename)
   if (input_render == std::string("binary"))
     render_mode = BINARY;
 
-  int width = parser.get<int>("camera", "width");
-  int height = parser.get<int>("camera", "height");
+  image_width = parser.get<int>("camera", "width");
+  image_height = parser.get<int>("camera", "height");
+
+  image = PPMImage(image_width, image_height, 255);
+
   std::vector<float> position =
       parser.get<std::vector<float>>("camera", "position");
   std::vector<float> lookAt =
@@ -27,8 +53,9 @@ int Renderer::load_file(const std::string& filename)
   float fov = parser.get<float>("camera", "fov");
   float exposure = parser.get<float>("camera", "exposure");
 
-  camera = PRenderHole{width,          height, Vec3(position), Vec3(lookAt),
-                       Vec3(upVector), fov,    exposure};
+  camera =
+      PRenderHole{image_width,    image_height, Vec3(position), Vec3(lookAt),
+                  Vec3(upVector), fov,          exposure};
 
   std::vector<float> bg =
       parser.get<std::vector<float>>("scene", "backgroundcolor");
@@ -38,13 +65,13 @@ int Renderer::load_file(const std::string& filename)
   for (const auto& shape : shapes)
   {
     std::string type = shape["type"];
-    Shape new_shape;
+    std::shared_ptr<Shape> new_shape;
     if (type == "sphere")
     {
       std::vector<float> center = shape["center"];
       float radius = shape["radius"];
 
-      new_shape = Sphere{Vec3{center}, radius};
+      new_shape = std::make_shared<Sphere>(Vec3{center}, radius);
     }
     else if (type == "cylinder")
     {
@@ -53,7 +80,7 @@ int Renderer::load_file(const std::string& filename)
       float radius = shape["radius"];
       float height = shape["height"];
 
-      new_shape = Cylinder{Vec3{center}, Vec3{axis}, radius, height};
+      new_shape = std::make_shared<Cylinder>(Vec3{center}, Vec3{axis}, radius, height);
     }
     else if (type == "triange")
     {
@@ -61,10 +88,10 @@ int Renderer::load_file(const std::string& filename)
       std::vector<float> v1 = shape["v1"];
       std::vector<float> v2 = shape["v2"];
 
-      new_shape = Triangle{Vec3{v0}, Vec3{v1}, Vec3{v2}};
+      new_shape = std::make_shared<Triangle>(Vec3{v0}, Vec3{v1}, Vec3{v2});
     }
 
-    scene.add_shape(new_shape);
+    scene.shapes.push_back(new_shape);
   }
 
   return 0;

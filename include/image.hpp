@@ -31,7 +31,9 @@ class PPMImage
   std::vector<std::vector<PPMColor>> data;
 
   public:
+  PPMImage(){};
   PPMImage(int width, int height, int max_color_value);
   void set_pixel(int x, int y, int r, int g, int b);
+  void set_pixel(int x, int y, PPMColor color);
   bool save_to_file(const std::string& filename);
 };
