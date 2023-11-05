@@ -12,7 +12,9 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 add_subdirectory(src)
 
-add_executable(main main.cpp)
+add_executable(main main.cpp
+        include/transform.hpp
+)
 target_compile_features(main PRIVATE cxx_std_17) 
 
 target_link_libraries(main PRIVATE raytracer_lib)

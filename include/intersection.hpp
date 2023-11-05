@@ -4,10 +4,17 @@
 #include "shape.hpp"
 #include "vector.hpp"
 
-struct Intersection
+#include "memory"
+
+class Shape;
+
+class Intersection
 {
-  Vec3 normal;
+  public:
+      Vec3 normal;
   Vec3 position;
-  float distance;
+  float distance{};
   std::shared_ptr<Shape> object;
+
+  Intersection()= default;
 };

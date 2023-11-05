@@ -139,3 +139,241 @@ This example assumes a `sample.json` file like:
 With this `JSONParser` class, you can read from a JSON file, retrieve values by their keys, and print the entire JSON content.
 
 Note: JSON parsing and manipulation with `nlohmann/json` are much richer than demonstrated. This example provides a starting point, but you can extend and customize it to fit more advanced requirements.
+
+2. Let's go through camera setup and ray generation in more detail 
+
+Certainly! To set up a camera and generate rays in a raytracer, you need to define the camera's properties and compute the rays that go through each pixel of the image you want to render. Here's an overview of the process:
+
+### Camera Setup
+
+Firstly, define the camera's properties:
+
+1. **Position** (`eye`): The point in space from which the camera is looking.
+2. **Look-at point** (`center`): The point the camera is directed at.
+3. **Up vector** (`up`): Usually (0, 1, 0) in Y-up coordinate systems, it defines which way is 'up' for the camera.
+4. **Field of View** (`fov`): Defines the extent of the scene that is seen on the display at any given moment.
+5. **Aspect Ratio**: The ratio of the image's width to its height.
+
+### Ray Generation
+
+For each pixel in the image, you need to compute the direction of the ray that goes from the camera position through the pixel. This involves several steps:
+
+1. **Viewport**: Define a "viewport" in the world space that corresponds to the camera's field of view. The size of this viewport can be calculated using the field of view and aspect ratio.
+2. **Ray Direction**: For each pixel, find the corresponding point on the viewport and calculate the ray direction from the camera position to this point.
+
+### Detailed Steps:
+
+1. **Calculate the Camera Basis Vectors**:
+   The camera's view direction and the up vector are used to create an orthonormal basis (u, v, w):
+   ```cpp
+   Vector3 w = normalize(eye - center);  // The 'forward' vector.
+   Vector3 u = normalize(cross(up, w));  // The 'right' vector.
+   Vector3 v = cross(w, u);              // The 'up' vector for the camera.
+   ```
+
+2. **Compute the Viewport Dimensions**:
+   The viewport height can be calculated from the field of view (`fov`) which is given in degrees:
+   ```cpp
+   float theta = fov * M_PI / 180.0f;
+   float half_height = tan(theta / 2.0f);
+   float half_width = aspect * half_height;
+   ```
+
+3. **Ray Direction for Each Pixel**:
+   Now, for each pixel (i, j), calculate the direction of the ray from the camera position through the pixel:
+   ```cpp
+   float s = (i + 0.5f) / image_width;
+   float t = (j + 0.5f) / image_height;
+   Vector3 ray_direction = u * (s - 0.5f) * 2.0f * half_width +
+                           v * (t - 0.5f) * 2.0f * half_height - w;
+   ray_direction = normalize(ray_direction);
+   ```
+
+   Here, `(i + 0.5f) / image_width` and `(j + 0.5f) / image_height` convert pixel indices to viewport coordinates in the range [-1, 1].
+
+4. **Create the Ray**:
+   Finally, create the ray with the origin at the camera's position (`eye`) and the direction you've just calculated:
+   ```cpp
+   Ray ray(eye, ray_direction);
+   ```
+
+   Here, `Ray` would be a class representing a ray with an origin and direction.
+
+Putting it all together, here's a conceptual C++ function to illustrate the process:
+
+```cpp
+class Camera {
+public:
+    Vector3 eye, center, up;
+    float fov, aspect;
+    // ...
+
+    Camera(/* parameters like position, look-at, up, fov, aspect ratio */) {
+        // Initialize camera properties
+    }
+
+    Ray get_ray(float s, float t) {
+        // Compute the camera basis vectors
+        Vector3 w = normalize(eye - center);
+        Vector3 u = normalize(cross(up, w));
+        Vector3 v = cross(w, u);
+
+        // Compute the viewport dimensions
+        float theta = fov * M_PI / 180.0f;
+        float half_height = tan(theta / 2);
+        float half_width = aspect * half_height;
+
+        // Compute the ray direction
+        Vector3 ray_direction = u * (s - 0.5f) * 2.0f * half_width +
+                                v * (t - 0.5f) * 2.0f * half_height - w;
+        ray_direction = normalize(ray_direction);
+
+        // Return the ray
+        return Ray(eye, ray_direction);
+    }
+};
+```
+
+This is a high-level view. The actual implementation may vary depending on the specifics of your raytracer and how you've set up your math library or vector classes. Each ray can then be traced through the scene to determine color by checking for intersections with objects in
+
+3. How to test for intersection and what to return
+
+To test for intersection with the scene, you typically loop through all the objects in the scene and test for intersection with each object individually. If an intersection is found, you want to keep track of the closest intersection, because that is the one that will be visible in the image (assuming opaque objects).
+
+Here is a basic concept of how you might perform intersection tests within the `Scene` class:
+
+```cpp
+#include <vector>
+#include <memory>
+#include <limits>
+
+class Scene {
+public:
+    std::vector<std::unique_ptr<Shape>> objects;
+    // ... other scene data like lights, camera, etc.
+
+    bool intersect(const Ray& ray, Intersection& closestIntersection) const {
+        bool hitSomething = false;
+        float closestSoFar = std::numeric_limits<float>::max();
+
+        for (const auto& object : objects) {
+            Intersection intersection;
+            if (object->intersect(ray, 0.001f, closestSoFar, intersection)) {
+                hitSomething = true;
+                if (intersection.distance < closestSoFar) {
+                    closestSoFar = intersection.distance;
+                    closestIntersection = intersection;
+                }
+            }
+        }
+
+        return hitSomething;
+    }
+};
+```
+
+Within each `Shape` class, you would have an `intersect` method that looks something like this:
+
+```cpp
+class Shape {
+public:
+    virtual bool intersect(const Ray& ray, float tMin, float tMax, Intersection& intersection) const = 0;
+    // Other methods and data members
+};
+```
+
+And then, for a specific shape like a `Sphere`, you might have an intersection method implemented like this:
+
+```cpp
+class Sphere : public Shape {
+public:
+    Vector3 center;
+    float radius;
+    Material material;
+
+    Sphere(const Vector3& c, float r, const Material& m) : center(c), radius(r), material(m) {}
+
+    bool intersect(const Ray& ray, float tMin, float tMax, Intersection& intersection) const override {
+        Vector3 oc = ray.origin - center;
+        float a = ray.direction.dot(ray.direction);
+        float b = oc.dot(ray.direction);
+        float c = oc.dot(oc) - radius * radius;
+        float discriminant = b * b - a * c;
+
+        if (discriminant > 0) {
+            float temp = (-b - sqrt(discriminant)) / a;
+            if (temp < tMax && temp > tMin) {
+                intersection.distance = temp;
+                intersection.position = ray.pointAtParameter(intersection.distance);
+                intersection.normal = (intersection.position - center) / radius;
+                intersection.object = this;
+                return true;
+            }
+            temp = (-b + sqrt(discriminant)) / a;
+            if (temp < tMax && temp > tMin) {
+                intersection.distance = temp;
+                intersection.position = ray.pointAtParameter(intersection.distance);
+                intersection.normal = (intersection.position - center) / radius;
+                intersection.object = this;
+                return true;
+            }
+        }
+        return false;
+    }
+};
+```
+
+For every `Shape` subclass, you will need to implement the `intersect` method to handle the intersection logic for that particular shape. The `Intersection` structure returned should contain all the necessary information about the point of intersection, like the distance to the intersection, the point of intersection, the normal at the intersection, and a pointer to the intersected object.
+
+The intersection function for each shape is based on the mathematical equations that describe how rays intersect with that particular shape. For example, the intersection function for a sphere uses the quadratic formula to find where a ray intersects a sphere.
+
+It's important to set a minimum and maximum bound for the intersection (`tMin` and `tMax`) to avoid issues like floating-point imprecision and to allow for things like shadow rays to not intersect with the object they are being cast from. The closest intersection is kept by checking against `closestSoFar` and updating this value whenever a closer intersection is found.
+
+In more complex renderers, you would use acceleration structures like bounding volume hierarchies (BVH) or KD-trees to efficiently find the closest intersection without having to test against every single object in the scene.
+
+4. Create method for ray.point at parameter
+
+In a ray tracer, a ray can be defined by an origin point and a direction vector. To find a point along the ray, we often use a parameter `t` that scales the direction vector. The function to find a point at a parameter `t` along the ray is usually called `pointAtParameter` or similarly.
+
+Here is a simple C++ class for a Ray and the method `pointAtParameter`:
+
+```cpp
+#include <glm/glm.hpp> // Using GLM for vector and operations
+
+class Ray {
+public:
+    glm::vec3 origin;
+    glm::vec3 direction;
+
+    Ray(const glm::vec3 &origin, const glm::vec3 &direction) : origin(origin), direction(direction) {}
+
+    glm::vec3 pointAtParameter(float t) const {
+        return origin + t * direction; // point = origin + t * direction
+    }
+};
+```
+
+In this example, I'm using the GLM library, which is a popular mathematics library for graphics software that provides vector and matrix operations similar to GLSL (OpenGL Shading Language). If you aren't using GLM, you'd need to define your own vector class and ensure it supports the necessary operations like addition and scalar multiplication.
+
+Remember to link the GLM library in your build system if you decide to use it.
+
+Here's how you might use the `pointAtParameter` method in practice:
+
+```cpp
+int main() {
+    glm::vec3 rayOrigin(0.0f, 0.0f, 0.0f);
+    glm::vec3 rayDirection(1.0f, 0.0f, 0.0f);
+
+    Ray myRay(rayOrigin, rayDirection);
+
+    float t = 10.0f; // Parameter t along the ray
+    glm::vec3 point = myRay.pointAtParameter(t);
+
+    std::cout << "Point at parameter " << t << ": ("
+              << point.x << ", " << point.y << ", " << point.z << ")" << std::endl;
+
+    return 0;
+}
+```
+
+This code would output the point on the ray at parameter `t`, which would be `(10, 0, 0)` in this case since the direction is along the x-axis and the origin is at the origin of the coordinate system.

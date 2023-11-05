@@ -25,6 +25,8 @@ class Renderer
 
   JSONParser parser;
 
+  Material load_material(nlohmann::json j);
+
   public:
   Renderer();
   int load_file(const std::string&);

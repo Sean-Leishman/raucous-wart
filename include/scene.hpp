@@ -8,19 +8,11 @@
 #include <memory>
 #include <vector>
 
-struct BackgroundColor
-{
-  float r;
-  float g;
-  float b;
-};
 
 class Scene
 {
-  private:
-  BackgroundColor bg_color;
-
   public:
+      PPMColor bg_color;
   std::vector<std::shared_ptr<Shape>> shapes;
 
   Scene();

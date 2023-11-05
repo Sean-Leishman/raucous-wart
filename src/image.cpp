@@ -41,7 +41,7 @@ bool PPMImage::save_to_file(const std::string& filename)
   {
     for (int x = 0; x < width; x++)
     {
-      file << data[y][x] << "\n";
+      file << data[height - y - 1][width - x - 1] << "\n";
     }
   }
 

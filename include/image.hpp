@@ -1,3 +1,5 @@
+#pragma once
+
 #include <fstream>
 #include <iostream>
 #include <vector>
@@ -11,8 +13,8 @@ class PPMColor
   int a;
 
   public:
+      PPMColor(){};
   PPMColor(int r, int g, int b, int a = 255) : r(r), g(g), b(b), a(a){};
-  PPMColor() {}
 
   friend std::ostream& operator<<(std::ostream& out, PPMColor& v)
   {
