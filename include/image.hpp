@@ -8,12 +8,12 @@
 
 class PPMColor
 {
-  private:
+  public:
+      float r;
   float g;
   float b;
   float a;
 
-  public:
       PPMColor(){};
   PPMColor(float r, float g, float b, float a = 1) : r(r), g(g), b(b), a(a){};
   PPMColor(std::vector<float> rgb): r(rgb[0]), g(rgb[1]), b(rgb[2]), a(1){};
@@ -41,12 +41,15 @@ class PPMColor
     return PPMColor(r + color.r, g + color.g, b + color.b);
   }
 
+  Vec3 to_vec() const {
+    return Vec3(r, g, b);
+  }
+
   void clamp(){
     r = std::min(1.0f, r);
     g  = std::min(1.0f, g);
     b = std::min(1.0f, b);
   }
-  float r;
 };
 
 class PPMImage

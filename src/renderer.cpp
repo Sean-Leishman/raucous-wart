@@ -66,12 +66,13 @@ PPMColor Renderer::trace_phong_ray(Ray& ray, Intersection& hit_info)
     Vec3 H = Vec3::normalize(light_dir + view_dir);
 
     float NdotL = std::max(hit_info.normal.dot(light_dir), 0.0f);
-    Vec3 diffuse = light->intensity * material.kd * NdotL;
+    Vec3 diffuse = material.diffuse_color.to_vec() * light->intensity * material.kd * NdotL;
 
     float NdotH = std::max(hit_info.normal.dot(H), 0.0f);
-    Vec3 specular = light->intensity * material.ks * std::pow(NdotH, material.reflectivity);
+    Vec3 specular =
+        material.specular_color.to_vec() * light->intensity * material.ks * std::pow(NdotH, material.specular_exp);
 
-    PPMColor color = PPMColor(diffuse + specular);
+    color = PPMColor(diffuse + specular);
     color.clamp();
   }
   return color;
@@ -116,7 +117,7 @@ void Renderer::load_shapes(nlohmann::json shapes){
   for (const auto& shape : shapes)
   {
     std::string type = shape["type"];
-    Shape new_shape;
+    std::shared_ptr<Shape> new_shape;
     if (type == "sphere")
     {
       std::vector<float> center = shape["center"];
@@ -154,7 +155,6 @@ void Renderer::load_shapes(nlohmann::json shapes){
         material = load_material(shape["material"]);
       }
       new_shape = std::make_shared<Triangle>(Vec3{v0}, Vec3{v1}, Vec3{v2}, material);
-      std::cout << ((Triangle) new_shape).v0[0];
     }
 
     if (new_shape != nullptr){
