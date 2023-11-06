@@ -45,15 +45,43 @@ Cylinder::Cylinder(Vec3 center, Vec3 axis, float radius, float height,
                    Material material )
     : center(center), axis(axis), radius(radius), height(height), Shape(material){};
 
-bool Cylinder::intersect(const Ray& ray, float tmin, float tmax, Intersection* intersection) const {
-  Vec3 co = ray.origin - center;
-  float a = ray.direction.dot(ray.direction) - pow(ray.direction.dot(axis), 2);
-  float b = 2 * (ray.direction.dot(co) - (ray.direction.dot(axis) * co.dot(axis)));
-  float c = co.dot(co) - pow(co.dot(axis), 2) - radius * radius;
+bool Cylinder::intersect_caps(const Vec3& origin, const Vec3& direction, float t, Intersection* intersection) const {
+        if (direction.y == 0){
+            return false;
+        }
+        float half_height = height / 2.0f;
+        float tt = (half_height - origin.y) / direction.y;
+        if (tt < 0){
+            tt = (-half_height - origin.y) / direction.y;
+        }
+        if (tt < 0) {
+            return false;
+        }
 
+        Vec3 p = origin + direction * tt;
+        if (p.x * p.x + p.z * p.z <= radius * radius){
+            intersection->position = p;
+            intersection->distance = t;
+            intersection->normal = (t * direction.y > 0) ? Vec3(0, -1, 0) : Vec3(0, 1, 0);
+            return true;
+        }
+        return false;
+}
+bool Cylinder::intersect(const Ray& ray, float tmin, float tmax, Intersection* intersection) const {
+        Quaternion rotation = rotation_from_to(axis, Vec3(0,1,0));
+        Vec3 transform_ray_origin = rotate_vector(ray.origin - center, rotation);
+        Vec3 transform_ray_dir = rotate_vector(ray.direction, rotation);
+
+  Vec3 oc = transform_ray_origin;
+  Vec3 dir = Vec3::normalize(transform_ray_dir);
+  float a = dir.x * dir.x + dir.z * dir.z;
+  float b = 2.0f * (oc.x * dir.x + oc.z * dir.z);
+  float c = oc.x * oc.x + oc.z * oc.z - radius * radius;
+
+  // Interaction with infinite cylinder
   float discriminant = b * b - 4 * a * c;
   if (discriminant < 0) {
-            return {};  // No intersection
+            return false;  // No intersection
   }
 
   float sqrt_discriminant = sqrt(discriminant);
@@ -61,32 +89,41 @@ bool Cylinder::intersect(const Ray& ray, float tmin, float tmax, Intersection* i
   float t2 = (-b + sqrt_discriminant) / (2 * a);
 
   // Check if the intersections are within the bounds of the cylinder's height
-  float y_min = center.y - height / 2;
-  float y_max = center.y + height / 2;
-
-  float x_min = center.x - radius / 2;
-  float x_max = center.x + radius / 2;
-
   float t = t1;
   if (t < tmin || t > tmax) {
             t = t2;
             if (t < tmin || t > tmax) {
-                return {};  // Both intersection points are out of bounds
+                bool intersect = intersect_caps(oc, dir, t, intersection);
+                if (!intersect) return false;
+                intersection->position = rotate_vector(intersection->position, rotation) + center;
+                intersection->normal = rotate_vector(intersection->normal, rotation);
+                intersection->object = get_shared_ptr();
+                return true;  // Both intersection points are out of bounds
             }
   }
 
   // Get the intersection point
-  Vec3 point = ray.point_at_parameter(t);
+  Vec3 point = ray.point_at_parameter(transform_ray_origin, transform_ray_dir, t);
 
-  // Check if the intersection point is within the height bounds of the cylinder
-  if (point.y < y_min || point.y > y_max) return false;
-  if (point.x < x_min || point.x > x_max) return false;
+  float half_height = height * 0.5f;
+  if (point.y < -half_height  || point.y > half_height){
+    bool intersect = intersect_caps(oc, dir, t, intersection);
+    if (!intersect) return false;
+    intersection->position = rotate_vector(intersection->position, rotation) + center;
+    intersection->normal = rotate_vector(intersection->normal, rotation);
+    intersection->object = get_shared_ptr();
+    return true;  // Both intersection points are out of bounds
+  }
 
   // Calculate the normal at the intersection point
-  Vec3 normal = (point - center - axis * (point - center).dot(axis));
+  Vec3 normal = Vec3::normalize(point - center);
+  normal.y = 0;
+
+  point = rotate_vector(point, rotation.conjugate()) + center;
+  normal = rotate_vector(normal, rotation.conjugate());
 
   intersection->position = point;
-  intersection->normal = Vec3::normalize(normal);
+  intersection->normal = normal;
   intersection->object = get_shared_ptr();
   intersection->distance = t;
   return true;

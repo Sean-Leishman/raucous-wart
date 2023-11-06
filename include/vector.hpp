@@ -99,12 +99,16 @@ class Quaternion{
         );
       }
 
-      void normalize(){
-        float norm = std::sqrt(w*w + x*x + y*y + z*z);
-        w /=norm;
+      void normalize()
+      {
+        float norm = std::sqrt(w * w + x * x + y * y + z * z);
+        w /= norm;
         x /= norm;
         y /= norm;
         z /= norm;
       }
-
+      Quaternion conjugate() const { return {w, -x, -y, -z}; }
 };
+
+Quaternion rotation_from_to(Vec3 from, Vec3 to);
+Vec3 rotate_vector(const Vec3& v, const Quaternion& q);

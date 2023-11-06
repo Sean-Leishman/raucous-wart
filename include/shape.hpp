@@ -53,6 +53,8 @@ class Cylinder : public Shape
   std::shared_ptr<const Shape> get_shared_ptr() const override {
     return shared_from_this();
   }
+
+  bool intersect_caps(const Vec3&, const Vec3&, float, Intersection*) const;
   bool intersect(const Ray& ray, float tmin, float tmax, Intersection* intersection) const override;
 };
 

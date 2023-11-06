@@ -41,8 +41,10 @@ PPMColor Renderer::trace_ray(Ray ray)
     switch (render_mode){
       case BINARY:
         color = PPMColor(0,1,0);
+        break;
       case PHONG:
         color = trace_phong_ray(ray, hit_info);
+        break;
     }
   }
   else{
