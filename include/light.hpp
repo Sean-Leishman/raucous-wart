@@ -14,6 +14,7 @@ class Light{
       Vec3 intensity;
       PPMColor color;
 
+      Light(Vec3, Vec3);
     virtual ~Light(){};
 
     virtual float compute_intensity(float) = 0;
@@ -21,12 +22,8 @@ class Light{
 
 class PointLight: public Light {
 public:
-    Vec3 position;
-    Vec3 intensity;
-    PPMColor color;
-
-    ~PointLight() = default;
-    PointLight() = default;
+    ~PointLight()=default;
+    PointLight();
     PointLight(Vec3 position, Vec3 intensity);
     float compute_intensity(float) override;
 };

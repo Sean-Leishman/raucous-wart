@@ -1,3 +1,5 @@
 external/
 .cache/ 
 out/
+cmake-build-debug/
+.idea/

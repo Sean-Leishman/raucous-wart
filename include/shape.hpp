@@ -12,10 +12,12 @@ class Shape: public std::enable_shared_from_this<Shape>
 {
   private:
   public:
-       Material material;
+      Shape();
+      Shape(Material material);
+      Material material;
   virtual ~Shape()= default;
 
-  virtual std::shared_ptr<Shape> get_shared_ptr()  = 0;
+  virtual std::shared_ptr<const Shape> get_shared_ptr()  const = 0;
   virtual bool intersect(const Ray& ray, float tmin, float tmax,
                          Intersection* intersection) const = 0;
 };
@@ -27,18 +29,14 @@ class Sphere : public Shape
   double radius;
 
   public:
-      Material material;
-
-  Sphere();
   Sphere(Vec3, float, Material);
-  Sphere(float, float, float, float);
 
 
-  std::shared_ptr<Shape> get_shared_ptr() override
+  std::shared_ptr<const Shape> get_shared_ptr() const override
   {
     return shared_from_this();
   }
-  bool intersect(const Ray&, float, float, Intersection*) ;
+  bool intersect(const Ray&, float, float, Intersection*) const override;
 };
 
 class Cylinder : public Shape
@@ -50,12 +48,9 @@ class Cylinder : public Shape
   float height;
 
   public:
-      Material material;
-
-  Cylinder();
   Cylinder(Vec3, Vec3, float, float, Material);
 
-  std::shared_ptr<Shape> get_shared_ptr() override {
+  std::shared_ptr<const Shape> get_shared_ptr() const override {
     return shared_from_this();
   }
   bool intersect(const Ray& ray, float tmin, float tmax, Intersection* intersection) const override;
@@ -69,11 +64,10 @@ class Triangle : public Shape
   Vec3 v2;
 
   public:
-      Material material;
   Triangle();
   Triangle(Vec3, Vec3, Vec3, Material);
 
-  std::shared_ptr<Shape> get_shared_ptr() override {
+  std::shared_ptr<const Shape> get_shared_ptr() const override {
     return shared_from_this();
   }
 

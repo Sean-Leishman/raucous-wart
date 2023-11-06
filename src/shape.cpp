@@ -6,15 +6,12 @@
 
 #define EPSILON 0.00000001f
 
-Sphere::Sphere()
-{
-  center = Vec3();
-  radius = 0;
-}
+Shape::Shape(): material(Material()){};
+Shape::Shape(Material material): material(material){};
 
-Sphere::Sphere(Vec3 center, float radius, Material material) : center(center), radius(radius), material(material){};
+Sphere::Sphere(Vec3 center, float radius, Material material) : center(center), radius(radius), Shape(material){};
 
-bool Sphere::intersect(const Ray& ray, float tmin, float tmax, Intersection* intersection)
+bool Sphere::intersect(const Ray& ray, float tmin, float tmax, Intersection* intersection) const
 {
         Vec3 oc = ray.origin - center;
         float a = ray.direction.dot(ray.direction);
@@ -27,7 +24,7 @@ bool Sphere::intersect(const Ray& ray, float tmin, float tmax, Intersection* int
             if (temp < tmax && temp > tmin) {
                 intersection->distance = temp;
                 intersection->position = ray.point_at_parameter(intersection->distance);
-                intersection->normal = (intersection->position - center) / radius;
+                intersection->normal = Vec3::normalize((intersection->position - center) / radius);
                 intersection->object = get_shared_ptr();
                 return true;
             }
@@ -35,7 +32,7 @@ bool Sphere::intersect(const Ray& ray, float tmin, float tmax, Intersection* int
             if (temp < tmax && temp > tmin) {
                 intersection->distance = temp;
                 intersection->position = ray.point_at_parameter(intersection->distance);
-                intersection->normal = (intersection->position - center) / radius;
+                intersection->normal = Vec3::normalize((intersection->position - center) / radius);
                 intersection->object = get_shared_ptr();
                 return true;
             }
@@ -44,19 +41,11 @@ bool Sphere::intersect(const Ray& ray, float tmin, float tmax, Intersection* int
 
 }
 
-Cylinder::Cylinder()
-{
-  center = Vec3();
-  axis = Vec3();
-  radius = 0;
-  height = 0;
-}
-
 Cylinder::Cylinder(Vec3 center, Vec3 axis, float radius, float height,
                    Material material )
-    : center(center), axis(axis), radius(radius), height(height), material(material){};
+    : center(center), axis(axis), radius(radius), height(height), Shape(material){};
 
-bool Cylinder::intersect(const Ray& ray, float tmin, float tmax, Intersection* intersection) {
+bool Cylinder::intersect(const Ray& ray, float tmin, float tmax, Intersection* intersection) const {
   Vec3 co = ray.origin - center;
   float a = ray.direction.dot(ray.direction) - pow(ray.direction.dot(axis), 2);
   float b = 2 * (ray.direction.dot(co) - (ray.direction.dot(axis) * co.dot(axis)));
@@ -97,7 +86,7 @@ bool Cylinder::intersect(const Ray& ray, float tmin, float tmax, Intersection* i
   Vec3 normal = (point - center - axis * (point - center).dot(axis));
 
   intersection->position = point;
-  intersection->normal = normal;
+  intersection->normal = Vec3::normalize(normal);
   intersection->object = get_shared_ptr();
   intersection->distance = t;
   return true;
@@ -105,10 +94,10 @@ bool Cylinder::intersect(const Ray& ray, float tmin, float tmax, Intersection* i
 
 }
 
-Triangle::Triangle(): v0(Vec3()), v1(Vec3()), v2(Vec3()), material(Material()) {}
-Triangle::Triangle(Vec3 v0, Vec3 v1, Vec3 v2, Material material) : v0(v0), v1(v1), v2(v2), material(material){};
+Triangle::Triangle(): v0(Vec3()), v1(Vec3()), v2(Vec3()), Shape(Material()) {}
+Triangle::Triangle(Vec3 v0, Vec3 v1, Vec3 v2, Material material) : v0(v0), v1(v1), v2(v2), Shape(material){};
 
-bool Triangle::intersect(const Ray& ray, float tmin, float tmax, Intersection* intersection)
+bool Triangle::intersect(const Ray& ray, float tmin, float tmax, Intersection* intersection) const
 {
   Vec3 edge1 = v1 - v0;
   Vec3 edge2 = v2 - v0;
@@ -137,7 +126,7 @@ bool Triangle::intersect(const Ray& ray, float tmin, float tmax, Intersection* i
   {
             intersection->position = ray.point_at_parameter(t);
             intersection->distance = t;
-            intersection->normal = edge1.cross(edge2);
+            intersection->normal = Vec3::normalize(edge1.cross(edge2));
             intersection->object = get_shared_ptr();
             std::cout << intersection->object->material.diffuse_color.r << " " << get_shared_ptr().use_count() << "\n";
             return true;

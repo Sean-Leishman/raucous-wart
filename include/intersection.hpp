@@ -14,7 +14,7 @@ class Intersection
       Vec3 normal;
   Vec3 position;
   float distance{};
-  std::shared_ptr<Shape> object;
+  std::shared_ptr<const Shape> object;
 
   Intersection()= default;
 };
