@@ -27,7 +27,7 @@ bool Scene::intersect(Ray ray, Intersection& return_intersection)
   for (const auto& object : shapes)
   {
     Intersection intersection;
-    if (object->intersect(ray, 0.001f, hit_distance, intersection))
+    if (object->intersect(ray, 0.001f, hit_distance, &intersection))
     {
       hit = true;
       if (intersection.distance < hit_distance)

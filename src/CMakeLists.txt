@@ -3,7 +3,8 @@ set(LIBRARY_NAME raytracer_lib)
 file(GLOB SOURCES "*.cpp") 
 
 add_library(${LIBRARY_NAME} ${SOURCES}
-        material.cpp)
+        material.cpp
+        light.cpp)
 message(SOURCES="${SOURCES}")
 target_include_directories(${LIBRARY_NAME} PUBLIC "${PROJECT_SOURCE_DIR}/include")
 

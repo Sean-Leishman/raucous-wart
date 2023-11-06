@@ -377,3 +377,67 @@ int main() {
 ```
 
 This code would output the point on the ray at parameter `t`, which would be `(10, 0, 0)` in this case since the direction is along the x-axis and the origin is at the origin of the coordinate system.
+
+6. Write code for traceray
+
+The `traceRay` function is a core part of a ray tracer. It takes a ray and determines what that ray intersects in the scene. If there is an intersection, it computes the color for the ray by considering lights, material properties, and potentially casting more rays for reflections, refractions, etc.
+
+Here is a very basic structure of a `traceRay` function:
+
+```cpp
+#include "Ray.h"
+#include "Scene.h"
+#include "Intersection.h"
+#include "Material.h"
+#include <limits>
+
+Color traceRay(const Ray& ray, const Scene& scene, int depth) {
+    Intersection hitInfo;
+    Color color;
+
+    if (scene.intersect(ray, hitInfo)) {
+        // If the ray hits an object, determine the color at the intersection point
+        const Material& material = hitInfo.object->material;
+        
+        // Ambient color component
+        color = scene.ambientLight * material.ambient;
+        
+        // For each light in the scene
+        for (const auto& light : scene.lights) {
+            // Compute the lighting contribution
+            Vector3 lightDir = (light.position - hitInfo.position).normalized();
+            float lightIntensity = light.computeIntensity(hitInfo.position);
+
+            // Diffuse component
+            float diff = std::max(hitInfo.normal.dot(lightDir), 0.0f);
+            color += diff * material.diffuse * light.color * lightIntensity;
+            
+            // Specular component (Phong model)
+            Vector3 viewDir = (scene.camera.position - hitInfo.position).normalized();
+            Vector3 reflectDir = reflect(-lightDir, hitInfo.normal).normalized();
+            float spec = pow(std::max(viewDir.dot(reflectDir), 0.0f), material.shininess);
+            color += spec * material.specular * light.color * lightIntensity;
+
+            // Here you could add shadows, reflections, refractions, etc.
+        }
+
+        // Limit the color components to a maximum of 1.0
+        color.clamp();
+    } else {
+        // If the ray hits nothing, return the background color
+        color = scene.backgroundColor;
+    }
+
+    return color;
+}
+```
+
+To complete this, you would need the following components:
+
+- `Ray` class which defines a ray with an origin and direction.
+- `Scene` class which contains a collection of objects to be rendered, lights, a camera, and a method to detect intersections.
+- `Intersection` struct that holds information about an intersection, such as the position, normal at the intersection, distance from the ray origin, and a pointer to the object that was hit.
+- `Material` struct which defines the material properties like ambient, diffuse, specular components, and shininess.
+- `Color` class to represent color, often with clamp and other utility methods.
+
+Remember that this is a simplified example. In a real-world application, you would also have to handle shadows, recursive reflections, refractions, global illumination techniques, and so on. Additionally, you may need to implement optimizations such as bounding volume hierarchies (BVH) for efficient intersection tests.

@@ -33,4 +33,6 @@ class PRenderHole : public Camera
   PRenderHole(int, int, Vec3, Vec3, Vec3, float, float);
 
   Ray compute_ray(float, float);
+
+  Vec3 get_position() const {return position;}
 };
