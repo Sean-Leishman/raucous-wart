@@ -40,3 +40,18 @@ bool Scene::intersect(Ray ray, Intersection& return_intersection)
 
   return hit;
 }
+bool Scene::object_in_shadow(Ray shadow_ray, std::shared_ptr<const Shape> shadow_object, Intersection* shadow_hit){
+  float hit_distance = std::numeric_limits<float>::max();
+
+  for (const auto& object : shapes){
+    if (object == shadow_object){
+      continue;
+    }
+    Intersection intersection;
+    if (object->intersect(shadow_ray, 0.0001f, hit_distance, &intersection)){
+      shadow_hit->object = object;
+      return true;
+    }
+  }
+  return false;
+}

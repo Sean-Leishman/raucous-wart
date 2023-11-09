@@ -21,6 +21,9 @@ void Renderer::render_frame()
   {
     for (int y = 0; y < image_height; ++y)
     {
+      if (x == 560 && y == 325){
+        int r = 0;
+      }
       Ray ray = camera.compute_ray((float)x, (float)y);
       PPMColor color = trace_ray(ray);
       image.set_pixel(x, y, color);
@@ -56,15 +59,23 @@ PPMColor Renderer::trace_ray(Ray ray)
 
 PPMColor Renderer::trace_phong_ray(Ray& ray, Intersection& hit_info)
 {
-  PPMColor color;
+  Vec3 color;
   const Material& material = hit_info.object->material;
 
   Vec3 view_dir = Vec3::normalize(camera.get_position() - hit_info.position);
 
+  Vec3 ambient = material.diffuse_color.to_vec() * scene.ambient_light->intensity * scene.ambient_light->color.to_vec();
 
   for (const auto& light : scene.lights)
   {
     Vec3 light_dir = Vec3::normalize(light->position - hit_info.position);
+    Ray shadow_ray{hit_info.position, light_dir};
+    Intersection shadow_hit;
+
+    if (scene.object_in_shadow(shadow_ray, hit_info.object, &shadow_hit)){
+      continue;
+    }
+
     Vec3 H = Vec3::normalize(light_dir + view_dir);
 
     float NdotL = std::max(hit_info.normal.dot(light_dir), 0.0f);
@@ -74,10 +85,11 @@ PPMColor Renderer::trace_phong_ray(Ray& ray, Intersection& hit_info)
     Vec3 specular =
         material.specular_color.to_vec() * light->intensity * material.ks * std::pow(NdotH, material.specular_exp);
 
-    color = PPMColor(diffuse + specular);
-    color.clamp();
+    color = color + (diffuse + specular);
   }
-  return color;
+  PPMColor final{color + ambient};
+  final.clamp();
+  return final;
 }
 
 Material Renderer::load_material(nlohmann::json j){
@@ -108,9 +120,15 @@ void Renderer::load_lights(nlohmann::json lights){
         std::vector<float> intensity = light["intensity"];
 
         new_light = std::make_shared<PointLight>(position, intensity);
+        scene.lights.push_back(new_light);
+      }
+      else if (type == "ambientlight"){
+        std::vector<float> intensity = light["intensity"];
+        PPMColor color{light["color"]};
+        new_light = std::make_shared<AmbientLight>(intensity, color);
+        scene.ambient_light = new_light;
       }
 
-      scene.lights.push_back(new_light);
     }
 
 }
