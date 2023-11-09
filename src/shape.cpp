@@ -49,7 +49,7 @@ bool Cylinder::intersect_caps(const Vec3& origin, const Vec3& direction, float t
         if (direction.y == 0){
             return false;
         }
-        float half_height = height / 2.0f;
+        float half_height = height;
         float tt = (half_height - origin.y) / direction.y;
         if (tt < 0){
             tt = (-half_height - origin.y) / direction.y;
@@ -105,7 +105,7 @@ bool Cylinder::intersect(const Ray& ray, float tmin, float tmax, Intersection* i
   // Get the intersection point
   Vec3 point = ray.point_at_parameter(transform_ray_origin, transform_ray_dir, t);
 
-  float half_height = height * 0.5f;
+  float half_height = height;
   if (point.y < -half_height  || point.y > half_height){
     bool intersect = intersect_caps(oc, dir, t, intersection);
     if (!intersect) return false;
