@@ -7,7 +7,7 @@
 PPMImage::PPMImage(int width, int height, int max_color_value)
     : width(width), height(height), max_color_value(max_color_value)
 {
-  data.resize(height, std::vector<PPMColor>(width));
+  data.resize(width, std::vector<PPMColor>(height));
 }
 
 void PPMImage::set_pixel(int x, int y, int r, int g, int b)
@@ -19,11 +19,13 @@ void PPMImage::set_pixel(int x, int y, int r, int g, int b)
 void PPMImage::set_pixel(int x, int y, PPMColor color){
   if (x < 0 || x >= width || y < 0 || y >= height)
     return;
-  data[y][x] = color;
+  data[x][y] = color;
 }
 
 bool PPMImage::save_to_file(const std::string& filename)
 {
+  set_pixel(561,325, PPMColor(1,0,0));
+  set_pixel(500,300, PPMColor(1,0,0));
   std::ofstream file(filename);
   if (!file.is_open())
   {
@@ -41,7 +43,7 @@ bool PPMImage::save_to_file(const std::string& filename)
   {
     for (int x = 0; x < width; x++)
     {
-      file << data[height - y - 1][width - x - 1] << "\n";
+      file << data[width - x - 1][height - y - 1] << "\n";
     }
   }
 
