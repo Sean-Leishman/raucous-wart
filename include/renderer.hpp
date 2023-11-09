@@ -5,6 +5,7 @@
 #include "camera.hpp"
 #include "image.hpp"
 #include "ray.hpp"
+#include "raytracer.hpp"
 #include "scene.hpp"
 
 enum RenderMode
@@ -21,7 +22,7 @@ class Renderer
   int nbounces;
 
   PRenderHole camera;
-  RenderMode render_mode;
+  std::unique_ptr<Raytracer> raytracer;
   Scene scene;
   PPMImage image;
 
@@ -32,10 +33,10 @@ class Renderer
   void load_lights(nlohmann::json j);
 
   public:
+      ~Renderer()=default;
   Renderer();
   int load_file(const std::string&);
 
   void render_frame();
-  PPMColor trace_ray(Ray ray);
-  PPMColor trace_phong_ray(Ray& ray, Intersection& hit_info);
+
 };

@@ -13,7 +13,6 @@ Vec3 reflect(const Vec3& I, const Vec3& N) {
   return I - N * (2 * I.dot(N));
 }
 
-Renderer::Renderer(){};
 
 void Renderer::render_frame()
 {
@@ -25,7 +24,7 @@ void Renderer::render_frame()
         int r = 0;
       }
       Ray ray = camera.compute_ray((float)x, (float)y);
-      PPMColor color = trace_ray(ray);
+      PPMColor color = raytracer->trace_ray(ray);
       image.set_pixel(x, y, color);
     }
   }
@@ -34,63 +33,6 @@ void Renderer::render_frame()
   image.save_to_file("/home/seanleishman/University/cg/cw2/materials/1.ppm");
 }
 
-PPMColor Renderer::trace_ray(Ray ray)
-{
-  Intersection hit_info;
-  PPMColor color;
-
-  if (scene.intersect(ray, hit_info))
-  {
-    switch (render_mode){
-      case BINARY:
-        color = PPMColor(0,1,0);
-        break;
-      case PHONG:
-        color = trace_phong_ray(ray, hit_info);
-        break;
-    }
-  }
-  else{
-    color = scene.bg_color;
-  }
-
-  return color;
-}
-
-PPMColor Renderer::trace_phong_ray(Ray& ray, Intersection& hit_info)
-{
-  Vec3 color;
-  const Material& material = hit_info.object->material;
-
-  Vec3 view_dir = Vec3::normalize(camera.get_position() - hit_info.position);
-
-  Vec3 ambient = material.diffuse_color.to_vec() * scene.ambient_light->intensity * scene.ambient_light->color.to_vec();
-
-  for (const auto& light : scene.lights)
-  {
-    Vec3 light_dir = Vec3::normalize(light->position - hit_info.position);
-    Ray shadow_ray{hit_info.position, light_dir};
-    Intersection shadow_hit;
-
-    if (scene.object_in_shadow(shadow_ray, hit_info.object, &shadow_hit)){
-      continue;
-    }
-
-    Vec3 H = Vec3::normalize(light_dir + view_dir);
-
-    float NdotL = std::max(hit_info.normal.dot(light_dir), 0.0f);
-    Vec3 diffuse = material.diffuse_color.to_vec() * light->intensity * material.kd * NdotL;
-
-    float NdotH = std::max(hit_info.normal.dot(H), 0.0f);
-    Vec3 specular =
-        material.specular_color.to_vec() * light->intensity * material.ks * std::pow(NdotH, material.specular_exp);
-
-    color = color + (diffuse + specular);
-  }
-  PPMColor final{color + ambient};
-  final.clamp();
-  return final;
-}
 
 Material Renderer::load_material(nlohmann::json j){
   Material mat{};
@@ -187,11 +129,6 @@ int Renderer::load_file(const std::string& filename)
   parser.read_file(filename);
   auto input_render = parser.get<std::string>("rendermode");
 
-  if (input_render == std::string("binary"))
-    render_mode = BINARY;
-  else if (input_render == std::string("phong")){
-      render_mode = PHONG;
-      nbounces = parser.get<int>("nbounces");}
 
   image_width = parser.get<int>("camera", "width");
   image_height = parser.get<int>("camera", "height");
@@ -221,7 +158,22 @@ int Renderer::load_file(const std::string& filename)
       load_lights(parser.get<std::vector<nlohmann::json>>("scene", "lightsources"));
   }
 
+  if (input_render == std::string("binary")){
+    raytracer = std::make_unique<BinaryRaytracer>(&scene, &camera);
+  }
+  else if (input_render == std::string("phong")){
+    raytracer = std::make_unique<PhongRaytracer>(&scene, &camera);
+    nbounces = parser.get<int>("nbounces");
+  }
+  else{
+    throw std::runtime_error("Raytracer not initialised");
+  }
+
   return 0;
+}
+
+Renderer::Renderer()
+{
 }
 
 

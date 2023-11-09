@@ -5,7 +5,8 @@
 
 class Camera
 {
-  private:
+  public:
+  virtual Vec3 get_position() = 0;
 };
 
 class PRenderHole : public Camera
@@ -34,5 +35,6 @@ class PRenderHole : public Camera
 
   Ray compute_ray(float, float);
 
-  Vec3 get_position() const {return position;}
+  Vec3 get_position() override {return position;};
+
 };
