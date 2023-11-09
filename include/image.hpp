@@ -14,7 +14,7 @@ class PPMColor
   float b;
   float a;
 
-      PPMColor(){};
+      PPMColor(): r(1), g(1), b(1){};
   PPMColor(float r, float g, float b, float a = 1) : r(r), g(g), b(b), a(a){};
   PPMColor(std::vector<float> rgb): r(rgb[0]), g(rgb[1]), b(rgb[2]), a(1){};
   PPMColor(Vec3 rgb): r(rgb.x), g(rgb.y), b(rgb.z){};

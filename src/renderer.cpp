@@ -9,10 +9,6 @@
 #include "material.hpp"
 #include <memory>
 
-Vec3 reflect(const Vec3& I, const Vec3& N) {
-  return I - N * (2 * I.dot(N));
-}
-
 
 void Renderer::render_frame()
 {
@@ -54,6 +50,7 @@ Material Renderer::load_material(nlohmann::json j){
 }
 
 void Renderer::load_lights(nlohmann::json lights){
+  scene.ambient_light = std::make_shared<AmbientLight>(Vec3(0,0,0), Vec3(0,0,0));
     for (const auto& light: lights){
       std::string type = light["type"];
       std::shared_ptr<Light> new_light;
@@ -162,8 +159,8 @@ int Renderer::load_file(const std::string& filename)
     raytracer = std::make_unique<BinaryRaytracer>(&scene, &camera);
   }
   else if (input_render == std::string("phong")){
-    raytracer = std::make_unique<PhongRaytracer>(&scene, &camera);
     nbounces = parser.get<int>("nbounces");
+    raytracer = std::make_unique<PhongRaytracer>(&scene, &camera, nbounces);
   }
   else{
     throw std::runtime_error("Raytracer not initialised");

@@ -26,6 +26,13 @@ class BinaryRaytracer: public Raytracer{
 
 class PhongRaytracer: public Raytracer{
   public:
-      PhongRaytracer(Scene* scene, Camera* camera) : Raytracer(scene, camera) {}
+      int max_depth;
+
+      PhongRaytracer(Scene* scene, Camera* camera, int nbounces) : Raytracer(scene, camera), max_depth(nbounces) {}
       PPMColor trace_ray(Ray& ray) override;
+      Vec3 trace_ray(Ray& ray, int depth);
+      Vec3 calculate_direct(Intersection& hit_info);
+      Ray calculate_reflection_ray(Ray& ray, Intersection& hit_info);
+      Ray calculate_refraction_ray(Ray& ray, Intersection& hit_info);
+
 };
