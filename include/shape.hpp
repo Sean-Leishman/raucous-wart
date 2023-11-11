@@ -6,6 +6,11 @@
 #include "shape.hpp"
 #include "vector.hpp"
 
+struct Vec2{
+  float u;
+  float v;
+};
+
 class Intersection;
 
 class Shape: public std::enable_shared_from_this<Shape>
@@ -20,6 +25,7 @@ class Shape: public std::enable_shared_from_this<Shape>
   virtual std::shared_ptr<const Shape> get_shared_ptr()  const = 0;
   virtual bool intersect(const Ray& ray, float tmin, float tmax,
                          Intersection* intersection) const = 0;
+  virtual Vec2 get_uv(const Vec3& point) const = 0;
 };
 
 class Sphere : public Shape
@@ -36,6 +42,7 @@ class Sphere : public Shape
   {
     return shared_from_this();
   }
+  Vec2 get_uv(const Vec3& point) const override;
   bool intersect(const Ray&, float, float, Intersection*) const override;
 };
 
@@ -54,6 +61,7 @@ class Cylinder : public Shape
     return shared_from_this();
   }
 
+  Vec2 get_uv(const Vec3& point)  const override;
   bool intersect_caps(const Vec3&, const Vec3&, float, Intersection*) const;
   bool intersect(const Ray& ray, float tmin, float tmax, Intersection* intersection) const override;
 };
@@ -73,5 +81,6 @@ class Triangle : public Shape
     return shared_from_this();
   }
 
+  Vec2 get_uv(const Vec3& point) const override;
   bool intersect(const Ray& ray, float tmin, float tmax, Intersection* intersection) const override;
 };

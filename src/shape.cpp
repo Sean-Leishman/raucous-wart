@@ -41,6 +41,17 @@ bool Sphere::intersect(const Ray& ray, float tmin, float tmax, Intersection* int
 
 }
 
+Vec2 Sphere::get_uv(const Vec3& point) const
+{
+        float theta = acos(-point.y);
+        float phi = atan2(-point.z, point.x) + M_PI;
+
+        float u = phi / (2 * M_PI);
+        float v = theta / M_PI;
+
+        return {u, v};
+}
+
 Cylinder::Cylinder(Vec3 center, Vec3 axis, float radius, float height,
                    Material material )
     : center(center), axis(axis), radius(radius), height(height), Shape(material){};
@@ -131,6 +142,14 @@ bool Cylinder::intersect(const Ray& ray, float tmin, float tmax, Intersection* i
 
 }
 
+Vec2 Cylinder::get_uv(const Vec3& point) const
+{
+  float u = (atan2(point.z, point.x) + M_PI) / (2 * M_PI);
+  float v = (point.y + height);
+
+  return {u, v};
+}
+
 Triangle::Triangle(): v0(Vec3()), v1(Vec3()), v2(Vec3()), Shape(Material()) {}
 Triangle::Triangle(Vec3 v0, Vec3 v1, Vec3 v2, Material material) : v0(v0), v1(v1), v2(v2), Shape(material){};
 
@@ -170,4 +189,17 @@ bool Triangle::intersect(const Ray& ray, float tmin, float tmax, Intersection* i
   }
 
   return false;
+}
+
+Vec2 Triangle::get_uv(const Vec3& point) const
+{
+  float min_x = std::min(std::min(v0.x, v1.x), v2.x);
+  float min_y = std::min(std::min(v0.y, v1.y), v2.y);
+  float max_x = std::max(std::max(v0.x, v1.x), v2.x);
+  float max_y = std::max(std::max(v0.y, v1.y), v2.y);
+
+  float u = (point.x - min_x) / (max_x - min_x);
+  float v = (point.y - min_y) / (max_y - max_x);
+
+  return {u,v};
 }

@@ -63,6 +63,11 @@ Vec3 PhongRaytracer::calculate_direct(Intersection& hit_info){
   Vec3 view_dir = Vec3::normalize(camera->get_position() - hit_info.position);
   Vec3 color;
 
+  if (material.texture.loaded){
+    Vec2 uv = hit_info.object->get_uv(hit_info.position);
+    color=material.texture.get_color(uv.u, uv.v).to_vec();
+  }
+
   for (const auto& light : scene->lights)
   {
     Vec3 light_dir = Vec3::normalize(light->position - hit_info.position);

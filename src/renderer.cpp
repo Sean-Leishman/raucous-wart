@@ -46,6 +46,10 @@ Material Renderer::load_material(nlohmann::json j){
   mat.is_refractive = j["isrefractive"];
   mat.refractive_index = j["refractiveindex"];
 
+  if (j.contains("texture")){
+    mat.texture.loaded = mat.texture.image.read_from_file(j["texture"]);
+  }
+
   return mat;
 }
 
@@ -86,6 +90,7 @@ void Renderer::load_shapes(nlohmann::json shapes){
       if (shape.contains("material")){
         material = load_material(shape["material"]);
       }
+
 
       new_shape = std::make_shared<Sphere>(Vec3{center}, radius, material);
     }

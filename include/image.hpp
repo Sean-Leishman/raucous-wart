@@ -66,5 +66,7 @@ class PPMImage
   PPMImage(int width, int height, int max_color_value);
   void set_pixel(int x, int y, int r, int g, int b);
   void set_pixel(int x, int y, PPMColor color);
+  PPMColor get_pixel(float u, float v) const;
   bool save_to_file(const std::string& filename);
+  bool read_from_file(const std::string& filename);
 };
