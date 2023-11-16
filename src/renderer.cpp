@@ -26,7 +26,7 @@ void Renderer::render_frame()
   }
   std::cout << scene.shapes[0] << "\n";
 
-  image.save_to_file("/home/seanleishman/University/cg/cw2/materials/1.ppm");
+  image.save_to_file("/home/seanleishman/University/cg/cw2/materials/2.ppm");
 }
 
 
@@ -47,7 +47,7 @@ Material Renderer::load_material(nlohmann::json j){
   mat.refractive_index = j["refractiveindex"];
 
   if (j.contains("texture")){
-    mat.texture.loaded = mat.texture.image.read_from_file(j["texture"]);
+    // mat.texture.loaded = mat.texture.image.read_from_file(j["texture"]);
   }
 
   return mat;
@@ -135,7 +135,7 @@ int Renderer::load_file(const std::string& filename)
   image_width = parser.get<int>("camera", "width");
   image_height = parser.get<int>("camera", "height");
 
-  image = PPMImage(image_width, image_height, 255);
+  image.set(image_width, image_height, 255);
 
   auto position =
       parser.get<std::vector<float>>("camera", "position");

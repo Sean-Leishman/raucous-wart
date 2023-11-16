@@ -15,8 +15,9 @@ add_subdirectory(src)
 add_executable(main main.cpp
         include/transform.hpp
 )
-target_compile_features(main PRIVATE cxx_std_17) 
+target_compile_features(main PRIVATE cxx_std_17)
+target_compile_options(main PRIVATE -lasan -fno-omit-frame-pointer -fsanitize=address)
 
-target_link_libraries(main PRIVATE raytracer_lib)
+target_link_libraries(main PRIVATE raytracer_lib -lasan -fno-omit-frame-pointer -fsanitize=address)
 
 #target_link_libraries(main PRIVATE spdlog::spdlog $<$<BOOL:${MINGW}>:ws2_32>)

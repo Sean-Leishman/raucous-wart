@@ -7,7 +7,7 @@ class Texture {
      PPMImage image;
      bool loaded;
 
-     Texture(): loaded(false), image(PPMImage{}){};
+     Texture(): loaded(false) {};
 
      PPMColor get_color(float u, float v) const {
        return image.get_pixel(u, v);

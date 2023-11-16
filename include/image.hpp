@@ -5,6 +5,7 @@
 #include <fstream>
 #include <iostream>
 #include <vector>
+#include <algorithm>
 
 class PPMColor
 {
@@ -18,6 +19,13 @@ class PPMColor
   PPMColor(float r, float g, float b, float a = 1) : r(r), g(g), b(b), a(a){};
   PPMColor(std::vector<float> rgb): r(rgb[0]), g(rgb[1]), b(rgb[2]), a(1){};
   PPMColor(Vec3 rgb): r(rgb.x), g(rgb.y), b(rgb.z){};
+
+  PPMColor(PPMColor& t){
+    r = t.r;
+    b = t.b;
+    g = t.g;
+  };
+  PPMColor(const PPMColor& t): r(t.r), b(t.b), g(t.g){};
 
   friend std::ostream& operator<<(std::ostream& out, PPMColor& v)
   {
@@ -63,10 +71,37 @@ class PPMImage
 
   public:
   PPMImage(){};
+
+  ~PPMImage()=default;
+  PPMImage(PPMImage &t)
+  {
+    width = t.width;
+    height = t.height;
+    max_color_value = t.max_color_value;
+
+    for (auto it=t.data.begin(); it!=t.data.end(); ++it){
+      auto i = std::distance(t.data.begin(), it);
+
+      data[i] = std::vector<PPMColor>(height);
+      for (auto it2=t.data[i].begin(); it2!=t.data[i].end(); ++it2){
+        auto j = std::distance(t.data[i].begin(), it2);
+        data[i][j] = t.data[i][j];
+        }
+    }
+  }
+
   PPMImage(int width, int height, int max_color_value);
+
   void set_pixel(int x, int y, int r, int g, int b);
   void set_pixel(int x, int y, PPMColor color);
   PPMColor get_pixel(float u, float v) const;
   bool save_to_file(const std::string& filename);
   bool read_from_file(const std::string& filename);
+
+  void set(int _width, int _height, int _max_color_value){
+    width=_width;
+    height=_height;
+    max_color_value=_max_color_value;
+    data.resize(width, std::vector<PPMColor>(height));
+  }
 };

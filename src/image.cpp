@@ -1,7 +1,6 @@
 #include "image.hpp"
 
 #include <fstream>
-#include <iostream>
 #include <vector>
 
 PPMImage::PPMImage(int width, int height, int max_color_value)
@@ -30,28 +29,28 @@ PPMColor PPMImage::get_pixel(float u, float v) const {
 
 bool PPMImage::save_to_file(const std::string& filename)
 {
-  std::ofstream file(filename);
-  if (!file.is_open())
+  std::ofstream image_file(filename);
+  if (!image_file.is_open())
   {
     std::cerr << "Failed to open file for writing." << std::endl;
     return false;
   }
 
   // Write header
-  file << "P3\n";
-  file << width << " " << height << "\n";
-  file << max_color_value << "\n";
+  image_file << "P3\n";
+  image_file << width << " " << height << "\n";
+  image_file << max_color_value << "\n";
 
   // Write pixel data
   for (int y = 0; y < height; y++)
   {
     for (int x = 0; x < width; x++)
     {
-      file << data[height - y - 1][width - x - 1] << "\n";
+      image_file << data[height - y - 1][width - x - 1] << "\n";
     }
   }
 
-  file.close();
+  image_file.close();
   return true;
 }
 
@@ -117,8 +116,8 @@ bool PPMImage::read_from_file(const std::string& filename){
     return false;
   }
 
+  file.close();
   save_to_file("/home/seanleishman/University/cg/cw2/materials/Martini2.ppm");
-
   return true;
 
 

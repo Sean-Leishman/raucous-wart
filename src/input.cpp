@@ -18,6 +18,8 @@ int JSONParser::read_file(const std::string& filename)
     std::cout << "File not found" << std::endl;
     return -1;
   }
+
+  file.close();
   return 0;
 }
 
