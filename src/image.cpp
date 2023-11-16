@@ -7,21 +7,21 @@
 PPMImage::PPMImage(int width, int height, int max_color_value)
     : width(width), height(height), max_color_value(max_color_value)
 {
-  data.resize(width, std::vector<PPMColor>(height));
+  data.resize(width * height, PPMColor{});
 }
 
 void PPMImage::set_pixel(int x, int y, PPMColor color)
 {
   if (x < 0 || x >= width || y < 0 || y >= height)
     return;
-  data[y][x] = color;
+  data[(y * width) + x] = color;
 }
 
 PPMColor PPMImage::get_pixel(float u, float v) const
 {
   int x = u * width;
   int y = v * height;
-  return data[y][x];
+  return data[(y * width) + x];
 }
 
 bool PPMImage::save_to_file(const std::string& filename)
@@ -45,7 +45,7 @@ bool PPMImage::save_to_file(const std::string& filename)
   {
     for (int x = 0; x < width; x++)
     {
-      image_file << data[height - y - 1][width - x - 1] << "\n";
+      image_file << data[(y * width) + x] << "\n";
     }
   }
 
@@ -86,7 +86,7 @@ bool PPMImage::read_from_file(const std::string& filename)
   file.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
 
   // Read pixel data
-  data.resize(height);
+  data.resize(height * width);
   std::vector<unsigned char> out(width * height * 3);
   if (p6)
   {
@@ -95,7 +95,6 @@ bool PPMImage::read_from_file(const std::string& filename)
 
   for (int y = 0; y < height; ++y)
   {
-    data[y].resize(width);
     if (p6)
     {
       for (int x = 0; x < width; ++x)
@@ -105,7 +104,7 @@ bool PPMImage::read_from_file(const std::string& filename)
                        static_cast<float>(out[index + 1] / maxVal),
                        static_cast<float>(out[index + 2] / maxVal)};
 
-        data[y][x] = color;
+        data[y * width + x] = color;
       }
     }
     else
@@ -116,7 +115,7 @@ bool PPMImage::read_from_file(const std::string& filename)
         file >> r >> g >> b;
         PPMColor color{r / max_color_value, g / max_color_value,
                        b / max_color_value};
-        data[y][x] = color;
+        data[y * width + x] = color;
       }
     }
   }
