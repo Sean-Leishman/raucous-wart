@@ -15,6 +15,7 @@ class Vec3
   Vec3();
   Vec3(std::vector<float>);
   Vec3(float, float, float);
+  Vec3(double x, double y, double z);
 
   Vec3 operator-(const Vec3& v) const {return Vec3(x - v.x, y - v.y, z - v.z);}
 
@@ -26,6 +27,15 @@ class Vec3
     return Vec3(x + v.x, y + v.y, z + v.z);
   }
 
+  Vec3 operator-(const float& v) const
+  {
+    return Vec3(x - v, y - v, z - v);
+  }
+
+  Vec3 operator+(const float& v) const
+  {
+    return Vec3(x + v, y + v, z + v);
+  }
   Vec3 operator/(const float c) const {
     return Vec3(x / c, y/c, z/c);
   }
@@ -40,6 +50,20 @@ class Vec3
     return x * v.x + y * v.y + z * v.z;
   }
 
+  float get(char c){
+    if (c == 'x') return x;
+    if (c == 'y') return y;
+    if (c == 'z') return z;
+    return std::numeric_limits<float>::max();
+  }
+
+  Vec3 min(const Vec3& other) const {
+    return {std::min(x, other.x), std::min(y, other.y), std::min(z, other.z)};
+  }
+
+  Vec3 max(const Vec3& other) const {
+    return {std::max(x, other.x), std::max(y, other.y), std::max(z, other.z)};
+  }
 
   void normalize()
   {

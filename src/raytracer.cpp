@@ -34,7 +34,7 @@ Vec3 PhongRaytracer::trace_ray(Ray& ray, int depth)
   Intersection hit_info;
   Vec3 color;
 
-  if (!scene->intersect(ray, hit_info))
+  if (!scene->intersect_bvh(ray, hit_info))
   {
     return scene->bg_color.to_vec();
   }

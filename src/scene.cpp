@@ -2,6 +2,7 @@
 #include "intersection.hpp"
 #include "ray.hpp"
 #include "shape.hpp"
+#include "bvh.hpp"
 
 #include <any>
 #include <limits>
@@ -14,9 +15,17 @@ Scene::Scene()
   shapes = std::vector<std::shared_ptr<Shape>>();
 }
 
+void Scene::build_bvh(){
+  bvh_tree.buildBVH(shapes);
+}
+
 void Scene::add_shape(std::shared_ptr<Shape> shape)
 {
   shapes.push_back(shape);
+}
+
+bool Scene::intersect_bvh(Ray ray, Intersection& intersection){
+  return bvh_tree.intersectBVH(ray, intersection);
 }
 
 bool Scene::intersect(Ray ray, Intersection& return_intersection)

@@ -3,15 +3,21 @@
 #include "material.hpp"
 #include "ray.hpp"
 #include "vector.hpp"
+
+
 #include <cmath>
 
 #define EPSILON 0.00000001f
+
+
 
 Shape::Shape() : material(Material()){};
 Shape::Shape(Material material) : material(material){};
 
 Sphere::Sphere(Vec3 center, float radius, Material material)
-    : center(center), radius(radius), Shape(material){};
+    : center(center), radius(radius), Shape(material){
+      bbox = {center - radius, center+radius};
+                                      };
 
 bool Sphere::intersect(const Ray& ray, float tmin, float tmax,
                        Intersection* intersection) const
@@ -64,7 +70,12 @@ Vec2 Sphere::interpolate_uv(const Intersection* hit_info) const
 Cylinder::Cylinder(Vec3 center, Vec3 axis, float radius, float height,
                    Material material)
     : center(center), axis(axis), radius(radius), height(height),
-      Shape(material){};
+      Shape(material){
+  bbox = {
+      Vec3{static_cast<float>(center.x - radius), static_cast<float>(center.y), static_cast<float>(center.z - radius)},
+      Vec3{static_cast<float>(center.x + radius), static_cast<float>(center.y + height), static_cast<float>(center.z + radius)}
+  };
+      };
 
 bool Cylinder::intersect_caps(const Vec3& origin, const Vec3& direction,
                               float t, Intersection* intersection) const
@@ -90,7 +101,7 @@ bool Cylinder::intersect_caps(const Vec3& origin, const Vec3& direction,
     intersection->position = p;
     intersection->distance = t;
     intersection->normal =
-        (t * direction.y > 0) ? Vec3(0, -1, 0) : Vec3(0, 1, 0);
+        (t * direction.y > 0) ? Vec3(0.0f, -1.0f, 0.0f) : Vec3(0.0f, 1.0f, 0.0f);
     return true;
   }
   return false;
@@ -98,7 +109,7 @@ bool Cylinder::intersect_caps(const Vec3& origin, const Vec3& direction,
 bool Cylinder::intersect(const Ray& ray, float tmin, float tmax,
                          Intersection* intersection) const
 {
-  Quaternion rotation = rotation_from_to(axis, Vec3(0, 1, 0));
+  Quaternion rotation = rotation_from_to(axis, Vec3(0.0f, 1.0f, 0.0f));
   Vec3 transform_ray_origin = rotate_vector(ray.origin - center, rotation);
   Vec3 transform_ray_dir = rotate_vector(ray.direction, rotation);
 
@@ -197,6 +208,11 @@ Triangle::Triangle(Vec3 v0, Vec3 v1, Vec3 v2, Material material)
   uv0 = get_uv(v0);
   uv1 = get_uv(v1);
   uv2 = get_uv(v2);
+
+  bbox = {
+      Vec3{std::min({v0.x, v1.x, v2.x}), std::min({v0.y, v1.y, v2.y}), std::min({v0.z, v1.z, v2.z})},
+      Vec3{std::max({v0.x, v1.x, v2.x}), std::max({v0.y, v1.y, v2.y}), std::max({v0.z, v1.z, v2.z})}
+  };
 };
 
 bool Triangle::intersect(const Ray& ray, float tmin, float tmax,

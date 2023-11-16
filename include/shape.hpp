@@ -17,13 +17,58 @@ struct Vec2
 
 class Intersection;
 
+struct BoundingBox
+{
+  Vec3 min;
+  Vec3 max;
+
+
+  float EPSILON = 1e-8;
+  float t_min = std::numeric_limits<float>::min();
+  float t_max = std::numeric_limits<float>::max();
+
+  bool intersect(const Ray& ray) {
+    char* axis = "xyz";
+
+    Vec3 invDir = {1.0f / ray.direction.x, 1.0f / ray.direction.y, 1.0f / ray.direction.z};
+    Vec3 t0 = (min - ray.origin) * invDir;
+    Vec3 t1 = (max - ray.origin) * invDir;
+
+    Vec3 tminv = t0.min(t1);
+    Vec3 tmaxv = t0.max(t1);
+
+    t_min = std::min({tminv.x, tminv.y, tminv.z});
+    t_max = std::min({tmaxv.x, tmaxv.y, tmaxv.z});
+
+    return t_max >= t_min;
+  }
+  Vec3 centroid() {
+    return {
+      (min.x + max.x) / 2,
+      (min.y + max.y) / 2,
+      (min.z + max.z) / 2,
+    };
+  }
+
+  void expand_for(const BoundingBox& b) {
+    min.x = std::min(min.x, b.min.x);
+    min.y = std::min(min.y, b.min.y);
+    min.z = std::min(min.z, b.min.z);
+    max.x = std::max(max.x, b.max.x);
+    max.y = std::max(max.y, b.max.y);
+    max.z = std::max(max.z, b.max.z);
+  }
+};
+
 class Shape : public std::enable_shared_from_this<Shape>
 {
   private:
   public:
+      Material material;
+      BoundingBox bbox;
+
   Shape();
   Shape(Material material);
-  Material material;
   virtual ~Shape() = default;
 
   virtual std::shared_ptr<const Shape> get_shared_ptr() const = 0;

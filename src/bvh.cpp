@@ -1,53 +1,147 @@
 #include "bvh.hpp"
 
+#include <vector>
+#include <memory>
+
+BVHNode::BVHNode(std::vector<std::shared_ptr<Shape>> shapes): objects(std::move(shapes)) {
+                                                      };
+void BVHTree::buildBVH(std::vector<std::shared_ptr<Shape>> objects){
+  root = _buildBVH(objects);
+}
+
 std::unique_ptr<BVHNode>
-BVHTree::buildBVH(const std::vector<std::unique_ptr<Shape>>& objects)
+BVHTree::_buildBVH(std::vector<std::shared_ptr<Shape>> objects)
 {
   if (objects.size() <= threshold)
   {
-    return std::make_unique<BVHNode>(objects);
+    auto node = std::make_unique<BVHNode>(std::move(objects));
+    /*
+    for (const auto& obj: node->objects){
+      node->bbox.expand_for(obj->bbox);
+    }
+    */
+    return node;
   }
+
   auto [leftObjects, rightObjects] = split_objects(objects);
-  std::unique_ptr<BVHNode> leftChild = buildBVH(leftObjects);
-  std::unique_ptr<BVHNode> rightChild = buildBVH(rightObjects);
+
+  std::unique_ptr<BVHNode> leftChild = _buildBVH(leftObjects);
+  std::unique_ptr<BVHNode> rightChild = _buildBVH(rightObjects);
 
   auto node = std::make_unique<BVHNode>();
   node->left = std::move(leftChild);
   node->right = std::move(rightChild);
-  updateBoundingBox(node.get());
+  update_bounding_box(node.get());
 
-  root = node;
+  return std::move(node);
+}
+
+void BVHTree::update_bounding_box(BVHNode* node) {
+  if (!node) return;
+
+  BoundingBox new_box;
+  new_box.max = {std::numeric_limits<float>::min(), std::numeric_limits<float>::min(), std::numeric_limits<float>::min()};
+  new_box.min = {std::numeric_limits<float>::max(), std::numeric_limits<float>::max(), std::numeric_limits<float>::max()};
+
+  if (node->left) {
+    new_box.expand_for(node->left->bbox);
+  }
+  if (node->right){
+    new_box.expand_for(node->right->bbox);
+  }
+
+  if (node->is_leaf()){
+    for (const auto& object: node->objects){
+      new_box.expand_for(object->bbox);
+    }
+  }
+
+  node->bbox = new_box;
 }
 
 std::pair<BVHTree::Shapes, BVHTree::Shapes>
-BVHTree::split_objects(BVHTree::Shapes objects)
+BVHTree::split_objects(BVHTree::Shapes& objects)
 {
-  char axis = 'x';
+  char* axis =  "xyz";
+
   std::vector<float> centroids;
-  centroids.reserve(objects.size());
-  for (const auto& obj : objects)
+
+  for (int i=0; i<3; ++i)
   {
-    centroids.push_back(obj->bbox.centroid()[axis]);
+    centroids.reserve(objects.size());
+    for (const auto& obj : objects)
+    {
+      centroids.push_back(obj->bbox.centroid().get(axis[i]));
+    }
+
+    std::nth_element(centroids.begin(),
+                     centroids.begin() + centroids.size() / 2, centroids.end());
+    float median = centroids[centroids.size() / 2];
+
+    // Split objects into two groups based on the median
+    std::vector<std::shared_ptr<Shape>> leftObjects, rightObjects;
+    for (int i = 0; i < objects.size(); ++i)
+    {
+
+      if (objects[i]->bbox.centroid().get(axis[i]) < median)
+      {
+        leftObjects.push_back(std::move(objects[i]));
+      }
+      else
+      {
+        rightObjects.push_back(std::move(objects[i]));
+      }
+    }
+
+    if (leftObjects.size() != 0 && rightObjects.size() != 0) {
+      return {std::move(leftObjects), std::move(rightObjects)};
+    }
   }
 
-  std::nth_element(centroids.begin(), centroids.begin() + centroids.size() / 2,
-                   centroids.end());
-  float median = centroids[centroids.size() / 2];
-
-  // Split objects into two groups based on the median
-  std::vector<Object*> leftObjects, rightObjects;
-  for (const auto& obj : objects)
-  {
-
-    if (obj->bbox.centroid()[axis] < median)
-    {
-      leftObjects.push_back(obj);
+  std::vector<std::shared_ptr<Shape>> leftObjects, rightObjects;
+  int half = objects.size() / 2;
+  for (int i=0; i<objects.size(); ++i){
+    if (i < half){
+      leftObjects.push_back(objects[i]);
     }
-    else
-    {
-      rightObjects.push_back(obj);
+    else {
+      rightObjects.push_back(objects[i]);
     }
   }
+  return {std::move(leftObjects), std::move(rightObjects)};
+}
 
-  return {leftObjects, rightObjects};
+
+bool BVHTree::intersectBVH(const Ray& ray, Intersection& hit_info)
+{
+  return intersectBVH(root.get(), ray, hit_info);
+}
+
+bool BVHTree::intersectBVH(BVHNode* node, const Ray& ray, Intersection& hit_info)
+{
+  if (!node || !node->bbox.intersect(ray)) return false;
+
+  if (node->is_leaf()){
+    float hit_distance = std::numeric_limits<float>::max();
+    Intersection rt;
+    bool hit = false;
+    for (auto const& obj:node->objects){
+      if (obj->intersect(ray, 0.0001f, hit_distance, &rt)){
+        if (rt.distance < hit_distance)
+        {
+          hit = true;
+          hit_distance = rt.distance;
+          hit_info = rt;
+        }
+      }
+    }
+    return hit;
+  }
+
+  bool hit_left = intersectBVH(node->left.get(), ray, hit_info);
+  bool hit_right = intersectBVH(node->right.get(), ray, hit_info);
+  return hit_left || hit_right;
+
+
+
 }

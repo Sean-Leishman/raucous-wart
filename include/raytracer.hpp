@@ -6,23 +6,6 @@
 #include "ray.hpp"
 #include "scene.hpp"
 
-struct BoundingBox
-{
-  Vec3 min;
-  Vec3 max;
-
-  bool intersect(const Ray& ray) { return false; }
-};
-
-struct BVHNode
-{
-  BoundingBox box;
-  std::unique_ptr<BVHNode> left;
-  std::unique_ptr<BVHNode> right;
-  std::vector<std::unique_ptr<Shape>> objects;
-
-  bool is_leaf() const { return objects.size() > 0; }
-};
 
 class Raytracer
 {

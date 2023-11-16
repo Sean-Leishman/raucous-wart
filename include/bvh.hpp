@@ -6,43 +6,43 @@
 #include "vector.hpp"
 
 #include <memory>
+#include <utility>
 
-struct BoundingBox
-{
-  Vec3 min;
-  Vec3 max;
 
-  bool intersect(const Ray& ray) { return false; }
-};
 
 class BVHNode
 {
   public:
-  BoundingBox box;
+  BoundingBox bbox;
   std::unique_ptr<BVHNode> left;
   std::unique_ptr<BVHNode> right;
-  std::vector<std::unique_ptr<Shape>> objects;
+  std::vector<std::shared_ptr<Shape>> objects;
 
   BVHNode() = default;
-  BVHNode(std::vector<std::unique_ptr<Shape>> shapes) : objects(shapes){};
+  BVHNode(std::vector<std::shared_ptr<Shape>> shapes);
 
   bool is_leaf() const { return objects.size() > 0; }
+
 };
 
 class BVHTree
 {
-  using Shapes = std::vector<std::unique_ptr<Shape>>;
+  using Shapes = std::vector<std::shared_ptr<Shape>>;
 
   private:
-  std::pair<Shapes, Shapes> split_objects(Shapes);
-
   public:
+      BVHTree(): threshold(1), root(std::make_unique<BVHNode>()){};
   float threshold;
   std::unique_ptr<BVHNode> root;
 
-  std::unique_ptr<BVHNode>
-  buildBVH(const std::vector<std::unique_ptr<Shape>>& objects);
+  void buildBVH(std::vector<std::shared_ptr<Shape>> objects);
+  void update_bounding_box(BVHNode* node);
 
-  bool intersectBVH(const BVHNode& node, const Ray& ray,
+  bool intersectBVH(BVHNode* node, const Ray& ray,
                     Intersection& hit_info);
+  bool intersect_bvh(Ray ray, Intersection& intersection);
+  std::pair<Shapes, Shapes> split_objects(Shapes& objects);
+  bool intersectBVH(const Ray& ray, Intersection& hit_info);
+  std::unique_ptr<BVHNode>
+  _buildBVH(std::vector<std::shared_ptr<Shape>> objects);
 };

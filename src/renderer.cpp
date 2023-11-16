@@ -12,6 +12,8 @@
 
 void Renderer::render_frame()
 {
+  scene.build_bvh();
+
   for (int x = 0; x < image_width; ++x)
   {
     for (int y = 0; y < image_height; ++y)
@@ -71,7 +73,7 @@ Material Renderer::load_material(nlohmann::json j)
 void Renderer::load_lights(nlohmann::json lights)
 {
   scene.ambient_light =
-      std::make_shared<AmbientLight>(Vec3(0, 0, 0), Vec3(0, 0, 0));
+      std::make_shared<AmbientLight>(Vec3(0.0f, 0.0f, 0.0f), Vec3(0.0f, 0.0f, 0.0f));
   for (const auto& light : lights)
   {
     std::string type = light["type"];
