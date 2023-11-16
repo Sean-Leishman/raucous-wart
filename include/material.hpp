@@ -16,11 +16,7 @@ class Texture
     loaded = image.read_from_file(filename);
   }
 
-  PPMColor get_color(float u, float v) const
-  {
-    // return image.get_pixel(u, v);
-    return PPMColor();
-  }
+  PPMColor get_color(float u, float v) const { return image.get_pixel(u, v); }
 };
 
 class Material

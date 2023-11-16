@@ -21,6 +21,8 @@ PPMColor PPMImage::get_pixel(float u, float v) const
 {
   int x = u * width;
   int y = v * height;
+
+  std::cout << "u: " << u << " v: " << v << std::endl;
   return data[(y * width) + x];
 }
 
@@ -128,6 +130,8 @@ bool PPMImage::read_from_file(const std::string& filename)
 
   std::filesystem::path path(std::filesystem::current_path());
   path += "/materials/Martini2.ppm";
+
+  std::cout << "save file: " << filename << ", to: " << path;
   save_to_file(path);
   return true;
 }

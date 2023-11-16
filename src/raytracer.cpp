@@ -72,7 +72,8 @@ Vec3 PhongRaytracer::calculate_direct(Intersection& hit_info)
 
   if (material.texture->loaded)
   {
-    Vec2 uv = hit_info.object->get_uv(hit_info.position);
+    Vec2 uv = hit_info.object->interpolate_uv(&hit_info);
+    // std::cout << hit_info.position << ":" << uv << std::endl;
     color = material.texture->get_color(uv.u, uv.v).to_vec();
   }
 

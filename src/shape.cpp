@@ -3,6 +3,7 @@
 #include "material.hpp"
 #include "ray.hpp"
 #include "vector.hpp"
+#include <cmath>
 
 #define EPSILON 0.00000001f
 
@@ -47,13 +48,15 @@ bool Sphere::intersect(const Ray& ray, float tmin, float tmax,
   return false;
 }
 
-Vec2 Sphere::get_uv(const Vec3& point) const
+Vec2 Sphere::interpolate_uv(const Intersection* hit_info) const
 {
-  float theta = acos(-point.y);
-  float phi = atan2(-point.z, point.x) + M_PI;
+  Vec3 point = hit_info->position;
 
-  float u = phi / (2 * M_PI);
-  float v = theta / M_PI;
+  float theta = atan2(point.y, point.x);
+  float phi = asin(point.z);
+
+  float u = (theta + M_PI) / (2 * M_PI);
+  float v = (phi + M_PI / 2) / M_PI;
 
   return {u, v};
 }
@@ -126,10 +129,13 @@ bool Cylinder::intersect(const Ray& ray, float tmin, float tmax,
       bool intersect = intersect_caps(oc, dir, t, intersection);
       if (!intersect)
         return false;
+
       intersection->position =
           rotate_vector(intersection->position, rotation) + center;
       intersection->normal = rotate_vector(intersection->normal, rotation);
       intersection->object = get_shared_ptr();
+      intersection->type = CAPS;
+
       return true; // Both intersection points are out of bounds
     }
   }
@@ -165,17 +171,33 @@ bool Cylinder::intersect(const Ray& ray, float tmin, float tmax,
   return true;
 }
 
-Vec2 Cylinder::get_uv(const Vec3& point) const
+Vec2 Cylinder::interpolate_uv(const Intersection* hit_info) const
 {
-  float u = (atan2(point.z, point.x) + M_PI) / (2 * M_PI);
-  float v = (point.y + height);
+  Vec3 point = hit_info->position;
+
+  float theta = atan2(point.y, point.x);
+  float u = (theta + M_PI) / (2 * M_PI);
+  float min_height = center.z - height;
+  float max_height = center.z + height;
+  float v = (point.z - min_height) / (max_height - min_height);
 
   return {u, v};
 }
 
-Triangle::Triangle() : v0(Vec3()), v1(Vec3()), v2(Vec3()), Shape(Material()) {}
+Triangle::Triangle() : v0(Vec3()), v1(Vec3()), v2(Vec3()), Shape(Material())
+{
+  uv0 = get_uv(v0);
+  uv1 = get_uv(v1);
+  uv2 = get_uv(v2);
+}
+
 Triangle::Triangle(Vec3 v0, Vec3 v1, Vec3 v2, Material material)
-    : v0(v0), v1(v1), v2(v2), Shape(material){};
+    : v0(v0), v1(v1), v2(v2), Shape(material)
+{
+  uv0 = get_uv(v0);
+  uv1 = get_uv(v1);
+  uv2 = get_uv(v2);
+};
 
 bool Triangle::intersect(const Ray& ray, float tmin, float tmax,
                          Intersection* intersection) const
@@ -215,15 +237,48 @@ bool Triangle::intersect(const Ray& ray, float tmin, float tmax,
   return false;
 }
 
+// TODO: Pick plane to project too based on differences in angle
 Vec2 Triangle::get_uv(const Vec3& point) const
 {
-  float min_x = std::min(std::min(v0.x, v1.x), v2.x);
-  float min_y = std::min(std::min(v0.y, v1.y), v2.y);
-  float max_x = std::max(std::max(v0.x, v1.x), v2.x);
-  float max_y = std::max(std::max(v0.y, v1.y), v2.y);
+
+  float min_x = std::min({v0.x, v1.x, v2.x});
+  float min_y = std::min({v0.y, v1.y, v2.y});
+  float max_x = std::max({v0.x, v1.x, v2.x});
+  float max_y = std::max({v0.y, v1.y, v2.y});
+  float min_z = std::min({v0.z, v1.z, v2.z});
+  float max_z = std::max({v0.z, v1.z, v2.z});
 
   float u = (point.x - min_x) / (max_x - min_x);
-  float v = (point.y - min_y) / (max_y - max_x);
+  float v = (point.z - min_z) / (max_z - min_z);
+
+  return {u, v};
+}
+
+Vec2 Triangle::interpolate_uv(const Intersection* hit_info) const
+{
+  Vec3 point = hit_info->position;
+
+  Vec3 e0 = v2 - v0;
+  Vec3 e1 = v1 - v0;
+  Vec3 e2 = point - v0;
+
+  float d00 = e0.dot(e0);
+  float d01 = e0.dot(e1);
+  float d11 = e1.dot(e1);
+  float d20 = e2.dot(e0);
+  float d21 = e2.dot(e1);
+  float denom = d00 * d11 - d01 * d01;
+
+  Vec3 barycentric;
+  barycentric.z = (d11 * d20 - d01 * d21) / denom;
+  barycentric.y = (d00 * d21 - d01 * d20) / denom;
+  barycentric.x = 1 - barycentric.y - barycentric.z;
+
+  float u =
+      uv0.u * barycentric.x + uv1.u * barycentric.y + uv2.u * barycentric.z;
+
+  float v =
+      uv0.v * barycentric.x + uv1.v * barycentric.y + uv2.v * barycentric.z;
 
   return {u, v};
 }
