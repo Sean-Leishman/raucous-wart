@@ -1,5 +1,6 @@
 #include "image.hpp"
 
+#include <filesystem>
 #include <fstream>
 #include <vector>
 
@@ -9,19 +10,15 @@ PPMImage::PPMImage(int width, int height, int max_color_value)
   data.resize(width, std::vector<PPMColor>(height));
 }
 
-void PPMImage::set_pixel(int x, int y, int r, int g, int b)
+void PPMImage::set_pixel(int x, int y, PPMColor color)
 {
-  PPMColor color = PPMColor{r, g, b};
-  set_pixel(x,y , color);
-}
-
-void PPMImage::set_pixel(int x, int y, PPMColor color){
   if (x < 0 || x >= width || y < 0 || y >= height)
     return;
   data[y][x] = color;
 }
 
-PPMColor PPMImage::get_pixel(float u, float v) const {
+PPMColor PPMImage::get_pixel(float u, float v) const
+{
   int x = u * width;
   int y = v * height;
   return data[y][x];
@@ -29,7 +26,9 @@ PPMColor PPMImage::get_pixel(float u, float v) const {
 
 bool PPMImage::save_to_file(const std::string& filename)
 {
-  std::ofstream image_file(filename);
+  std::filesystem::path path(std::filesystem::current_path());
+  path += filename;
+  std::ofstream image_file(path.string());
   if (!image_file.is_open())
   {
     std::cerr << "Failed to open file for writing." << std::endl;
@@ -54,9 +53,11 @@ bool PPMImage::save_to_file(const std::string& filename)
   return true;
 }
 
-bool PPMImage::read_from_file(const std::string& filename){
+bool PPMImage::read_from_file(const std::string& filename)
+{
   std::ifstream file(filename, std::ios::binary);
-  if (!file.is_open()){
+  if (!file.is_open())
+  {
     std::cerr << "failed to open file: " << filename << std::endl;
     return false;
   }
@@ -64,12 +65,14 @@ bool PPMImage::read_from_file(const std::string& filename){
   std::string line;
   std::getline(file, line);
   bool p6 = false;
-  if (line == "P6") {
+  if (line == "P6")
+  {
     p6 = true;
   }
 
   // Skip comments
-  while (file.peek() == '#') {
+  while (file.peek() == '#')
+  {
     std::getline(file, line);
   }
   // Read image dimensions
@@ -90,28 +93,36 @@ bool PPMImage::read_from_file(const std::string& filename){
     file.read(reinterpret_cast<char*>(out.data()), out.size());
   }
 
-  for (int y=0; y<height; ++y){
+  for (int y = 0; y < height; ++y)
+  {
     data[y].resize(width);
     if (p6)
     {
-      for (int x=0; x < width; ++x){
+      for (int x = 0; x < width; ++x)
+      {
         int index = (y * width + x) * 3;
-        PPMColor color{static_cast<float>(out[index]/maxVal), static_cast<float>(out[index+1]/maxVal), static_cast<float>(out[index+2]/maxVal)};
+        PPMColor color{static_cast<float>(out[index] / maxVal),
+                       static_cast<float>(out[index + 1] / maxVal),
+                       static_cast<float>(out[index + 2] / maxVal)};
 
         data[y][x] = color;
       }
     }
-    else {
-      for (int x=0; x<width; ++x){
+    else
+    {
+      for (int x = 0; x < width; ++x)
+      {
         float r, g, b;
         file >> r >> g >> b;
-        PPMColor color{r/max_color_value,g/max_color_value,b/max_color_value};
+        PPMColor color{r / max_color_value, g / max_color_value,
+                       b / max_color_value};
         data[y][x] = color;
       }
     }
   }
 
-  if (!file) {
+  if (!file)
+  {
     std::cerr << "Error occurred while reading the PPM file" << std::endl;
     return false;
   }
@@ -119,6 +130,4 @@ bool PPMImage::read_from_file(const std::string& filename){
   file.close();
   save_to_file("/home/seanleishman/University/cg/cw2/materials/Martini2.ppm");
   return true;
-
-
 }

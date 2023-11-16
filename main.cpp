@@ -2,8 +2,7 @@
 
 int main()
 {
-  std::string filename(
-      "/home/seanleishman/University/cg/cw2/materials/simple_phong.json");
+  std::string filename("/materials/simple_phong.json");
   Renderer renderer;
   renderer.load_file(filename);
   renderer.render_frame();

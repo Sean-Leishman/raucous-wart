@@ -7,8 +7,8 @@
 #include "json.hpp"
 #include "light.hpp"
 #include "material.hpp"
+#include <filesystem>
 #include <memory>
-
 
 void Renderer::render_frame()
 {
@@ -16,7 +16,8 @@ void Renderer::render_frame()
   {
     for (int y = 0; y < image_height; ++y)
     {
-      if (x == 560 && y == 325){
+      if (x == 560 && y == 325)
+      {
         int r = 0;
       }
       Ray ray = camera.compute_ray((float)x, (float)y);
@@ -26,13 +27,14 @@ void Renderer::render_frame()
   }
   std::cout << scene.shapes[0] << "\n";
 
-  image.save_to_file("/home/seanleishman/University/cg/cw2/materials/2.ppm");
+  image.save_to_file("/materials/2.ppm");
 }
 
-
-Material Renderer::load_material(nlohmann::json j){
+Material Renderer::load_material(nlohmann::json j)
+{
   Material mat{};
-  if (j.empty()){
+  if (j.empty())
+  {
     return mat;
   }
 
@@ -46,37 +48,42 @@ Material Renderer::load_material(nlohmann::json j){
   mat.is_refractive = j["isrefractive"];
   mat.refractive_index = j["refractiveindex"];
 
-  if (j.contains("texture")){
+  if (j.contains("texture"))
+  {
     // mat.texture.loaded = mat.texture.image.read_from_file(j["texture"]);
   }
 
   return mat;
 }
 
-void Renderer::load_lights(nlohmann::json lights){
-  scene.ambient_light = std::make_shared<AmbientLight>(Vec3(0,0,0), Vec3(0,0,0));
-    for (const auto& light: lights){
-      std::string type = light["type"];
-      std::shared_ptr<Light> new_light;
-      if (type == "pointlight"){
-        std::vector<float> position = light["position"];
-        std::vector<float> intensity = light["intensity"];
+void Renderer::load_lights(nlohmann::json lights)
+{
+  scene.ambient_light =
+      std::make_shared<AmbientLight>(Vec3(0, 0, 0), Vec3(0, 0, 0));
+  for (const auto& light : lights)
+  {
+    std::string type = light["type"];
+    std::shared_ptr<Light> new_light;
+    if (type == "pointlight")
+    {
+      std::vector<float> position = light["position"];
+      std::vector<float> intensity = light["intensity"];
 
-        new_light = std::make_shared<PointLight>(position, intensity);
-        scene.lights.push_back(new_light);
-      }
-      else if (type == "ambientlight"){
-        std::vector<float> intensity = light["intensity"];
-        PPMColor color{light["color"]};
-        new_light = std::make_shared<AmbientLight>(intensity, color);
-        scene.ambient_light = new_light;
-      }
-
+      new_light = std::make_shared<PointLight>(position, intensity);
+      scene.lights.push_back(new_light);
     }
-
+    else if (type == "ambientlight")
+    {
+      std::vector<float> intensity = light["intensity"];
+      PPMColor color{light["color"]};
+      new_light = std::make_shared<AmbientLight>(intensity, color);
+      scene.ambient_light = new_light;
+    }
+  }
 }
 
-void Renderer::load_shapes(nlohmann::json shapes){
+void Renderer::load_shapes(nlohmann::json shapes)
+{
   for (const auto& shape : shapes)
   {
     std::string type = shape["type"];
@@ -87,10 +94,10 @@ void Renderer::load_shapes(nlohmann::json shapes){
       float radius = shape["radius"];
 
       Material material;
-      if (shape.contains("material")){
+      if (shape.contains("material"))
+      {
         material = load_material(shape["material"]);
       }
-
 
       new_shape = std::make_shared<Sphere>(Vec3{center}, radius, material);
     }
@@ -102,11 +109,12 @@ void Renderer::load_shapes(nlohmann::json shapes){
       float height = shape["height"];
 
       Material material;
-      if (shape.contains("material")){
+      if (shape.contains("material"))
+      {
         material = load_material(shape["material"]);
       }
-      new_shape =
-          std::make_shared<Cylinder>(Vec3{center}, Vec3{axis}, radius, height, material);
+      new_shape = std::make_shared<Cylinder>(Vec3{center}, Vec3{axis}, radius,
+                                             height, material);
     }
     else if (type == "triangle")
     {
@@ -115,34 +123,37 @@ void Renderer::load_shapes(nlohmann::json shapes){
       std::vector<float> v2 = shape["v2"];
 
       Material material;
-      if (shape.contains("material")){
+      if (shape.contains("material"))
+      {
         material = load_material(shape["material"]);
       }
-      new_shape = std::make_shared<Triangle>(Vec3{v0}, Vec3{v1}, Vec3{v2}, material);
+      new_shape =
+          std::make_shared<Triangle>(Vec3{v0}, Vec3{v1}, Vec3{v2}, material);
     }
 
-    if (new_shape != nullptr){
-      scene.shapes.push_back(new_shape);}
+    if (new_shape != nullptr)
+    {
+      scene.shapes.push_back(new_shape);
+    }
   }
 }
 
 int Renderer::load_file(const std::string& filename)
 {
-  parser.read_file(filename);
-  auto input_render = parser.get<std::string>("rendermode");
+  std::filesystem::path path(std::filesystem::current_path());
+  path += filename;
+  parser.read_file(path.string());
 
+  auto input_render = parser.get<std::string>("rendermode");
 
   image_width = parser.get<int>("camera", "width");
   image_height = parser.get<int>("camera", "height");
 
   image.set(image_width, image_height, 255);
 
-  auto position =
-      parser.get<std::vector<float>>("camera", "position");
-  auto lookAt =
-      parser.get<std::vector<float>>("camera", "lookAt");
-  auto upVector =
-      parser.get<std::vector<float>>("camera", "upVector");
+  auto position = parser.get<std::vector<float>>("camera", "position");
+  auto lookAt = parser.get<std::vector<float>>("camera", "lookAt");
+  auto upVector = parser.get<std::vector<float>>("camera", "upVector");
   auto fov = parser.get<float>("camera", "fov");
   auto exposure = parser.get<float>("camera", "exposure");
 
@@ -156,26 +167,27 @@ int Renderer::load_file(const std::string& filename)
   auto shapes = parser.get<std::vector<nlohmann::json>>("scene", "shapes");
   load_shapes(shapes);
 
-  if (scene_json.contains("lightsources")){
-      load_lights(parser.get<std::vector<nlohmann::json>>("scene", "lightsources"));
+  if (scene_json.contains("lightsources"))
+  {
+    load_lights(
+        parser.get<std::vector<nlohmann::json>>("scene", "lightsources"));
   }
 
-  if (input_render == std::string("binary")){
+  if (input_render == std::string("binary"))
+  {
     raytracer = std::make_unique<BinaryRaytracer>(&scene, &camera);
   }
-  else if (input_render == std::string("phong")){
+  else if (input_render == std::string("phong"))
+  {
     nbounces = parser.get<int>("nbounces");
     raytracer = std::make_unique<PhongRaytracer>(&scene, &camera, nbounces);
   }
-  else{
+  else
+  {
     throw std::runtime_error("Raytracer not initialised");
   }
 
   return 0;
 }
 
-Renderer::Renderer()
-{
-}
-
-
+Renderer::Renderer() {}

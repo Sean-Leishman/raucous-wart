@@ -15,7 +15,7 @@ int JSONParser::read_file(const std::string& filename)
   }
   else
   {
-    std::cout << "File not found" << std::endl;
+    std::cout << "File not found: " << filename << std::endl;
     return -1;
   }
 
