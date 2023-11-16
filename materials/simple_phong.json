@@ -38,7 +38,7 @@
                             "reflectivity":1.0,
                             "isrefractive":false,
                             "refractiveindex":1.0,
-                            "texture": "/home/seanleishman/University/cg/cw2/materials/Martini.ppm"
+                            "texture": "/materials/Martini.ppm"
                         } 
                 },
                 {
@@ -94,7 +94,7 @@
                             "reflectivity":1.0,
                             "isrefractive":false,
                             "refractiveindex":1.0,
-                            "texture":"/home/seanleishman/University/cg/cw2/materials/spots.ppm"
+                            "texture":"/materials/spots.ppm"
                         }
                 }
             ] 

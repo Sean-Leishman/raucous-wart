@@ -27,12 +27,14 @@ void Renderer::render_frame()
   }
   std::cout << scene.shapes[0] << "\n";
 
-  image.save_to_file("/materials/2.ppm");
+  std::filesystem::path path(std::filesystem::current_path());
+  path += "/materials/2.ppm";
+  image.save_to_file(path);
 }
 
 Material Renderer::load_material(nlohmann::json j)
 {
-  Material mat{};
+  Material mat = Material();
   if (j.empty())
   {
     return mat;
@@ -50,7 +52,17 @@ Material Renderer::load_material(nlohmann::json j)
 
   if (j.contains("texture"))
   {
-    // mat.texture.loaded = mat.texture.image.read_from_file(j["texture"]);
+    std::string key = j["texture"];
+    if (textures.find(key) == textures.end())
+    {
+      std::filesystem::path filename(std::filesystem::current_path());
+      filename += key;
+      auto ptr = std::make_shared<Texture>(Texture{filename});
+
+      textures.insert(std::make_pair(key, ptr));
+    }
+    auto texture_ptr = textures.find(key);
+    mat.texture = texture_ptr->second;
   }
 
   return mat;

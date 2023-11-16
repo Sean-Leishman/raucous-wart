@@ -26,12 +26,10 @@ PPMColor PPMImage::get_pixel(float u, float v) const
 
 bool PPMImage::save_to_file(const std::string& filename)
 {
-  std::filesystem::path path(std::filesystem::current_path());
-  path += filename;
-  std::ofstream image_file(path.string());
+  std::ofstream image_file(filename);
   if (!image_file.is_open())
   {
-    std::cerr << "Failed to open file for writing." << std::endl;
+    std::cerr << "failed to open file for saving: " << filename << std::endl;
     return false;
   }
 
@@ -41,9 +39,9 @@ bool PPMImage::save_to_file(const std::string& filename)
   image_file << max_color_value << "\n";
 
   // Write pixel data
-  for (int y = 0; y < height; y++)
+  for (int y = height - 1; y >= 0; --y)
   {
-    for (int x = 0; x < width; x++)
+    for (int x = width - 1; x >= 0; --x)
     {
       image_file << data[(y * width) + x] << "\n";
     }
@@ -58,7 +56,7 @@ bool PPMImage::read_from_file(const std::string& filename)
   std::ifstream file(filename, std::ios::binary);
   if (!file.is_open())
   {
-    std::cerr << "failed to open file: " << filename << std::endl;
+    std::cerr << "failed to open file for reading: " << filename << std::endl;
     return false;
   }
 
@@ -127,6 +125,9 @@ bool PPMImage::read_from_file(const std::string& filename)
   }
 
   file.close();
-  save_to_file("/home/seanleishman/University/cg/cw2/materials/Martini2.ppm");
+
+  std::filesystem::path path(std::filesystem::current_path());
+  path += "/materials/Martini2.ppm";
+  save_to_file(path);
   return true;
 }

@@ -74,7 +74,7 @@ class PPMImage
   std::vector<PPMColor> data;
 
   public:
-  PPMImage() : width(1), height(1){};
+  PPMImage() : width(1), height(1), max_color_value(255){};
 
   ~PPMImage() = default;
 

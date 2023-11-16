@@ -2,13 +2,19 @@
 
 #include "image.hpp"
 
+#include <memory>
+
 class Texture
 {
   public:
-  //     PPMImage image;
+  PPMImage image;
   bool loaded;
 
   Texture() : loaded(false){};
+  Texture(const std::string& filename) : loaded(false)
+  {
+    loaded = image.read_from_file(filename);
+  }
 
   PPMColor get_color(float u, float v) const
   {
@@ -30,7 +36,7 @@ class Material
   bool is_refractive;
   float refractive_index;
 
-  Texture texture;
+  std::shared_ptr<Texture> texture;
 
   Material();
   Material(float, float, int, PPMColor, PPMColor, bool, float, bool, float,
