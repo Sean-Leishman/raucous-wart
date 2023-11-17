@@ -25,6 +25,10 @@ BVHTree::_buildBVH(std::vector<std::shared_ptr<Shape>> objects)
 
   auto [leftObjects, rightObjects] = split_objects(objects);
 
+  if (leftObjects.size() == 0 || rightObjects.size() == 0) {
+    auto node = std::make_unique<BVHNode>(std::move(objects));
+  }
+
   std::unique_ptr<BVHNode> leftChild = _buildBVH(leftObjects);
   std::unique_ptr<BVHNode> rightChild = _buildBVH(rightObjects);
 
@@ -92,37 +96,24 @@ BVHTree::split_objects(BVHTree::Shapes& objects)
         rightObjects.push_back(std::move(objects[i]));
       }
     }
-
-    if (leftObjects.size() != 0 && rightObjects.size() != 0) {
-      return {std::move(leftObjects), std::move(rightObjects)};
-    }
+    return {std::move(leftObjects), std::move(rightObjects)};
   }
 
-  std::vector<std::shared_ptr<Shape>> leftObjects, rightObjects;
-  int half = objects.size() / 2;
-  for (int i=0; i<objects.size(); ++i){
-    if (i < half){
-      leftObjects.push_back(objects[i]);
-    }
-    else {
-      rightObjects.push_back(objects[i]);
-    }
-  }
-  return {std::move(leftObjects), std::move(rightObjects)};
 }
 
 
-bool BVHTree::intersectBVH(const Ray& ray, Intersection& hit_info)
+bool BVHTree::intersectBVH(Ray& ray, Intersection& hit_info)
 {
   return intersectBVH(root.get(), ray, hit_info);
 }
 
-bool BVHTree::intersectBVH(BVHNode* node, const Ray& ray, Intersection& hit_info)
+bool BVHTree::intersectBVH(BVHNode* node, Ray& ray, Intersection& hit_info)
 {
   if (!node || !node->bbox.intersect(ray)) return false;
 
   if (node->is_leaf()){
-    float hit_distance = std::numeric_limits<float>::max();
+    float hit_distance = ray.hit_distance;
+
     Intersection rt;
     bool hit = false;
     for (auto const& obj:node->objects){
@@ -132,6 +123,8 @@ bool BVHTree::intersectBVH(BVHNode* node, const Ray& ray, Intersection& hit_info
           hit = true;
           hit_distance = rt.distance;
           hit_info = rt;
+
+          ray.hit_distance = hit_distance;
         }
       }
     }

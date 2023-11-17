@@ -2,6 +2,11 @@
 
 #include "vector.hpp"
 
+#include <memory>
+
+
+class Intersection;
+
 enum RayType {
   DIRECT,
   SHADOW,
@@ -12,8 +17,9 @@ class Ray
   public:
   Vec3 origin;
   Vec3 direction;
+  float hit_distance;
 
-  Ray()= default;
+  Ray();
   Ray(Vec3, Vec3);
 
   Vec3 point_at_parameter(float dist) const;

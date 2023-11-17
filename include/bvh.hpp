@@ -38,11 +38,11 @@ class BVHTree
   void buildBVH(std::vector<std::shared_ptr<Shape>> objects);
   void update_bounding_box(BVHNode* node);
 
-  bool intersectBVH(BVHNode* node, const Ray& ray,
+  bool intersectBVH(BVHNode* node, Ray& ray,
                     Intersection& hit_info);
   bool intersect_bvh(Ray ray, Intersection& intersection);
   std::pair<Shapes, Shapes> split_objects(Shapes& objects);
-  bool intersectBVH(const Ray& ray, Intersection& hit_info);
+  bool intersectBVH(Ray& ray, Intersection& hit_info);
   std::unique_ptr<BVHNode>
   _buildBVH(std::vector<std::shared_ptr<Shape>> objects);
 };

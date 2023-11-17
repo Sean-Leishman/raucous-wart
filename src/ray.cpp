@@ -1,6 +1,7 @@
 #include "ray.hpp"
 
-Ray::Ray(Vec3 origin ,Vec3 dir): origin(origin), direction(dir){};
+Ray::Ray(): hit_distance(std::numeric_limits<float>::max()){};
+Ray::Ray(Vec3 origin ,Vec3 dir): origin(origin), direction(dir), hit_distance(std::numeric_limits<float>::max()){};
 
 Vec3 Ray::point_at_parameter(float dist) const
 {
