@@ -13,6 +13,10 @@ struct Vec2
 
   Vec2 operator*(const float& f) const { return Vec2{u * f, v * f}; }
   Vec2 operator+(const Vec2& f) const { return Vec2{u + f.u, v + f.v}; }
+  friend std::ostream& operator<<(std::ostream& out, const Vec2& v) {
+    out << "(" << v.u << "," << v.v <<  ")";
+    return out;
+  }
 };
 
 class Intersection;
@@ -75,6 +79,8 @@ class Shape : public std::enable_shared_from_this<Shape>
   virtual bool intersect(const Ray& ray, float tmin, float tmax,
                          Intersection* intersection) const = 0;
   virtual Vec2 interpolate_uv(const Intersection* hit_info) const = 0;
+  virtual std::string name() const = 0;
+  friend std::ostream& operator<<(std::ostream& os, const Shape& shape);
 };
 
 class Sphere : public Shape
@@ -92,6 +98,7 @@ class Sphere : public Shape
   }
   Vec2 interpolate_uv(const Intersection* hit_info) const override;
   bool intersect(const Ray&, float, float, Intersection*) const override;
+  std::string name() const override {return "Sphere";};
 };
 
 class Cylinder : public Shape
@@ -114,6 +121,7 @@ class Cylinder : public Shape
   bool intersect_caps(const Vec3&, const Vec3&, float, Intersection*) const;
   bool intersect(const Ray& ray, float tmin, float tmax,
                  Intersection* intersection) const override;
+  std::string name() const override {return "Cylinder";};
 };
 
 class Triangle : public Shape
@@ -140,4 +148,5 @@ class Triangle : public Shape
   bool intersect(const Ray& ray, float tmin, float tmax,
                  Intersection* intersection) const override;
   Vec2 interpolate_uv(const Intersection* hit_info) const override;
+  std::string name() const override {return "Trigangle";};
 };

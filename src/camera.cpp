@@ -1,8 +1,13 @@
 #include "camera.hpp"
+#include "random.h"
 #include "ray.hpp"
+#include "raytracer.hpp"
 #include "vector.hpp"
 
 #include <numbers>
+
+
+
 
 PRenderHole::PRenderHole()
 {
@@ -17,12 +22,18 @@ PRenderHole::PRenderHole()
   right = Vec3();
   up = Vec3();
   forward = Vec3();
+
+  defocus_angle = 0;
+  focus_dist = 10;
+  defocus_u = Vec3();
+  defocus_v = Vec3();
 };
 
 PRenderHole::PRenderHole(int width, int height, Vec3 position, Vec3 lookAt,
                          Vec3 upVector, float fov, float exposure)
     : width(width), height(height), position(position), lookAt(lookAt),
-      upVector(upVector), fov(fov), exposure(exposure)
+      upVector(upVector), fov(fov), exposure(exposure), defocus_angle(-0.1), focus_dist(10),
+      defocus_u(Vec3()), defocus_v(Vec3())
 {
   forward = Vec3::normalize(position - lookAt);
   right = Vec3::normalize(upVector.cross(forward));
@@ -31,20 +42,45 @@ PRenderHole::PRenderHole(int width, int height, Vec3 position, Vec3 lookAt,
   aspect = width / (float)height;
 
   float theta = fov * M_PI / 180.0f;
-  half_width = std::tan(theta / 2.0f);
-  half_height = aspect * half_height;
+  half_height = 2 * std::tan(theta / 2.0f) * focus_dist;
+  half_width = aspect * half_height;
+
+  viewport_u = right * half_width;
+  viewport_v = up * -1 * half_height;
+
+  pixel_delta_u = viewport_u / width;
+  pixel_delta_v = viewport_v / height;
+
+
+  auto viewport_upper_left = position - (forward * focus_dist) - (viewport_u / 2) - (viewport_v / 2);
+  pixel100_loc = viewport_upper_left + (pixel_delta_u + pixel_delta_v) * 0.5;
+
+  auto defocus_radius = focus_dist * tan((defocus_angle / 2) * M_PI / 180.0f);
+  defocus_u = right * defocus_radius;
+  defocus_v = up * defocus_radius;
+
 };
 
 Ray PRenderHole::compute_ray(float s, float t)
 {
+  /*
   s = (s / (float)width) * 2 - 1;
   t = (t / (float)height) * 2 - 1;
 
   s *= aspect;
+   */
 
-  Vec3 ray_direction = right * half_width* s + up * half_width * t - forward;
+  auto pixel_center = pixel100_loc + (pixel_delta_u * s) + (pixel_delta_v * t);
+  auto pixel_sample = pixel_center; //+ pixel_sample_square();
+
+  auto ray_origin = (defocus_angle <= 0) ? position : defocus_disk_sample();
+  auto ray_direction = pixel_sample - ray_origin;
+
+ //  Vec3 ray_direction = right * half_width * s + up * half_width * t - forward;
 
   ray_direction = Vec3::normalize(ray_direction);
 
   return Ray{position, ray_direction};
 };
+
+

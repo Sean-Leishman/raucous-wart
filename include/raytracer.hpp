@@ -7,6 +7,7 @@
 #include "scene.hpp"
 
 
+
 class Raytracer
 {
   public:
@@ -37,8 +38,21 @@ class PhongRaytracer : public Raytracer
   {
   }
   PPMColor trace_ray(Ray& ray) override;
-  Vec3 trace_ray(Ray& ray, int depth);
+  Vec3 trace_ray(Ray& ray, int depth, Intersection& hit_info);
   Vec3 calculate_direct(Intersection& hit_info);
   Ray calculate_reflection_ray(Ray& ray, Intersection& hit_info);
-  Ray calculate_refraction_ray(Ray& ray, Intersection& hit_info);
+  Ray calculate_refraction_ray(Ray& ray, Intersection& hit_info, double ir);
+};
+
+class Pathtracer: public Raytracer
+{
+  public:
+      int max_depth;
+      int n_samples;
+
+      Pathtracer(Scene* scene, Camera* camera, int nbounces, int n_samples) : Raytracer(scene, camera), max_depth(nbounces), n_samples(n_samples){};
+
+      PPMColor trace_ray(Ray& ray) override;
+      Vec3 trace_ray(Ray& ray, int depth);
+      Vec3 calculate_direct_lighting(Ray& ray, Intersection& hit_info);
 };

@@ -19,6 +19,11 @@ Sphere::Sphere(Vec3 center, float radius, Material material)
       bbox = {center - radius, center+radius};
                                       };
 
+                                     std::ostream& operator<<(std::ostream& os, const Shape& shape) {
+os << "Area: " << shape.name();
+return os;
+                }
+
 bool Sphere::intersect(const Ray& ray, float tmin, float tmax,
                        Intersection* intersection) const
 {
@@ -28,9 +33,9 @@ bool Sphere::intersect(const Ray& ray, float tmin, float tmax,
   float c = oc.dot(oc) - radius * radius;
   float discriminant = b * b - a * c;
 
-  if (discriminant > 0)
-  {
-    float temp = (-b - sqrt(discriminant)) / a;
+  if (discriminant < 0) return false;
+
+    float temp = (-b - std::sqrt(discriminant)) / a;
     if (temp < tmax && temp > tmin)
     {
       intersection->distance = temp;
@@ -40,7 +45,7 @@ bool Sphere::intersect(const Ray& ray, float tmin, float tmax,
       intersection->object = get_shared_ptr();
       return true;
     }
-    temp = (-b + sqrt(discriminant)) / a;
+    temp = (-b + std::sqrt(discriminant)) / a;
     if (temp < tmax && temp > tmin)
     {
       intersection->distance = temp;
@@ -50,8 +55,7 @@ bool Sphere::intersect(const Ray& ray, float tmin, float tmax,
       intersection->object = get_shared_ptr();
       return true;
     }
-  }
-  return false;
+     return false;
 }
 
 Vec2 Sphere::interpolate_uv(const Intersection* hit_info) const

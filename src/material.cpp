@@ -1,6 +1,9 @@
 #include "material.hpp"
 #include "image.hpp"
 #include "vector.hpp"
+#include "intersection.hpp"
+#include "ray.hpp"
+#include "random.h"
 
 #include <memory>
 
@@ -10,4 +13,13 @@ Material::Material()
       reflectivity(1.0f), refractive_index(1.0f),
       texture(std::make_shared<Texture>(Texture()))
 {
+}
+
+
+bool Material::scatter(Ray& ray, Intersection& hit_info, Vec3& attenuation, Ray& scattered) const
+{
+  Vec3 scatter_dir = hit_info.normal + random_unit_vector();
+  scattered = {hit_info.position, scatter_dir};
+  attenuation = diffuse_color.to_vec();
+  return true;
 }

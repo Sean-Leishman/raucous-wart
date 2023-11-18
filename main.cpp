@@ -24,7 +24,7 @@ int debug()
 
 int main()
 {
-  std::string filename("/materials/simple_phong.json");
+  std::string filename("/materials/pathtracer.json");
   Renderer renderer;
   renderer.load_file(filename);
   renderer.render_frame();

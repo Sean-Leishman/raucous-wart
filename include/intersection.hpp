@@ -1,7 +1,6 @@
 #pragma once
 
 #include "input.hpp"
-#include "shape.hpp"
 #include "vector.hpp"
 
 #include "memory"
@@ -21,7 +20,9 @@ class Intersection
   Vec3 position;
   float distance{};
   IntersectionType type;
+  bool first_hit;
+
   std::shared_ptr<const Shape> object;
 
-  Intersection() : type(NORMAL){};
+  Intersection() : type(NORMAL), first_hit(true){};
 };

@@ -4,6 +4,7 @@
 #include <cmath>
 #include <iostream>
 #include <vector>
+#include "random.h"
 
 class Vec3
 {
@@ -11,6 +12,8 @@ class Vec3
   double x;
   double y;
   double z;
+
+
 
   Vec3();
   Vec3(std::vector<float>);
@@ -38,6 +41,11 @@ class Vec3
   }
   Vec3 operator/(const float c) const {
     return Vec3(x / c, y/c, z/c);
+  }
+
+  friend std::ostream& operator<<(std::ostream& out, const Vec3& v) {
+    out << "(" << v.x << "," << v.y << "," << v.z << ")";
+    return out;
   }
 
   Vec3 cross(const Vec3& v) const
@@ -81,7 +89,34 @@ class Vec3
     vec.normalize();
     return vec;
   }
-};
+
+  static Vec3 reflect(const Vec3& v, const Vec3& n) {
+    return v - n * 2*v.dot(n);
+  }
+
+  static Vec3 refract(const Vec3& uv, const Vec3& n, double etai_over_etat) {
+    auto cos_theta = fmin((uv * -1).dot(n), 1.0);
+    Vec3 r_out_perp =  (uv + n * cos_theta) * etai_over_etat;
+    Vec3 r_out_parallel = n * -sqrt(fabs(r_out_perp.dot(r_out_perp) * -1 + 1));
+    return r_out_perp + r_out_parallel;
+  }
+
+  inline static Vec3 random_in_unit_disk() {
+    while (true) {
+      auto p = Vec3(random_double(-1,1), random_double(-1,1), 0);
+      if (p.dot(p) < 1)
+        return p;
+    }
+  }
+  static Vec3 random() {
+    return Vec3(random_double(), random_double(), random_double());
+  }
+  static Vec3 random(double min, double max)
+  {
+    return Vec3(random_double(min, max), random_double(min, max),
+                random_double(min, max));
+  }
+  };
 
 class Mat3
 {
@@ -106,6 +141,8 @@ class Mat3
                 m[1][0] * vec.x + m[1][1] * vec.y + m[1][2] * vec.z,
                 m[2][0] * vec.x + m[2][1] * vec.y + m[2][2] * vec.z);
   }
+
+
 };
 
 class Quaternion{
@@ -136,3 +173,16 @@ class Quaternion{
 
 Quaternion rotation_from_to(Vec3 from, Vec3 to);
 Vec3 rotate_vector(const Vec3& v, const Quaternion& q);
+
+inline Vec3 random_in_unit_sphere() {
+      while (true) {
+        auto p = Vec3::random(-1,1);
+        if (p.dot(p) < 1)
+      return p;
+      }
+}
+
+inline Vec3 random_unit_vector()
+{
+      return Vec3::normalize(random_in_unit_sphere());
+}

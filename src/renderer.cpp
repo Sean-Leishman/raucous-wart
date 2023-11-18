@@ -93,6 +93,15 @@ void Renderer::load_lights(nlohmann::json lights)
       new_light = std::make_shared<AmbientLight>(intensity, color);
       scene.ambient_light = new_light;
     }
+    else if (type == "arealight"){
+      std::vector<float> position = light["position"];
+      std::vector<float> intensity = light["intensity"];
+      std::vector<float> size = light["size"];
+      std::vector<float> normal = light["normal"];
+
+      new_light = std::make_shared<AreaLight>(position, intensity, normal, size);
+      scene.lights.push_back(new_light);
+    }
   }
 }
 
@@ -195,6 +204,12 @@ int Renderer::load_file(const std::string& filename)
   {
     nbounces = parser.get<int>("nbounces");
     raytracer = std::make_unique<PhongRaytracer>(&scene, &camera, nbounces);
+  }
+  else if (input_render == std::string("pathtracer"))
+  {
+    nbounces = parser.get<int>("nbounces");
+    int nsamples = parser.get<int>("nsamples");
+    raytracer = std::make_unique<Pathtracer>(&scene, &camera, nbounces, nsamples);
   }
   else
   {

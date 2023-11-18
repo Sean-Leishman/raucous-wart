@@ -1,8 +1,11 @@
 #pragma once
 
 #include "image.hpp"
+#include "intersection.hpp"
+#include "ray.hpp"
 
 #include <memory>
+
 
 class Texture
 {
@@ -37,4 +40,7 @@ class Material
   Material();
   Material(float, float, int, PPMColor, PPMColor, bool, float, bool, float,
            std::string);
+
+  bool scatter(Ray& ray, Intersection& hit_info, Vec3& attenuation,
+               Ray& scattered) const;
 };

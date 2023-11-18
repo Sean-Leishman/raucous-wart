@@ -41,9 +41,9 @@ bool PPMImage::save_to_file(const std::string& filename)
   image_file << max_color_value << "\n";
 
   // Write pixel data
-  for (int y = height - 1; y >= 0; --y)
+  for (int y = 0; y < height; ++y)
   {
-    for (int x = width - 1; x >= 0; --x)
+    for (int x = width; x > 0;  --x)
     {
       image_file << data[(y * width) + x] << "\n";
     }
