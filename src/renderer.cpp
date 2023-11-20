@@ -18,14 +18,11 @@ void Renderer::render_frame()
   {
     for (int y = 0; y < image_height; ++y)
     {
-      if (x == 560 && y == 325)
-      {
-        int r = 0;
-      }
       Ray ray = camera.compute_ray((float)x, (float)y);
       PPMColor color = raytracer->trace_ray(ray);
       image.set_pixel(x, y, color);
     }
+    std::cout << "scan line: " << x << std::endl;
   }
   std::cout << scene.shapes[0] << "\n";
 
@@ -34,23 +31,13 @@ void Renderer::render_frame()
   image.save_to_file(path);
 }
 
-Material Renderer::load_material(nlohmann::json j)
+std::unique_ptr<Material> Renderer::load_material(nlohmann::json j)
 {
-  Material mat = Material();
-  if (j.empty())
-  {
-    return mat;
-  }
 
-  mat.ks = j["ks"];
-  mat.kd = j["kd"];
-  mat.specular_exp = j["specularexponent"];
-  mat.diffuse_color = PPMColor(j["diffusecolor"]);
-  mat.specular_color = PPMColor(j["specularcolor"]);
-  mat.is_reflective = j["isreflective"];
-  mat.reflectivity = j["reflectivity"];
-  mat.is_refractive = j["isrefractive"];
-  mat.refractive_index = j["refractiveindex"];
+  bool is_reflective = j["isreflective"];
+  bool is_refractive = j["isrefractive"];
+
+  std::shared_ptr<Texture> texture;
 
   if (j.contains("texture"))
   {
@@ -61,13 +48,37 @@ Material Renderer::load_material(nlohmann::json j)
       filename += key;
       auto ptr = std::make_shared<Texture>(Texture{filename});
 
-      textures.insert(std::make_pair(key, ptr));
+      textures.insert(std::make_pair(key, std::move(ptr)));
     }
     auto texture_ptr = textures.find(key);
-    mat.texture = texture_ptr->second;
+    texture = texture_ptr->second;
+  }
+  else
+  {
+    texture = std::make_shared<Texture>();
   }
 
-  return mat;
+  std::unique_ptr<Material> material;
+  if (is_reflective) {
+    material = std::make_unique<ReflectiveMaterial>();
+  }
+  else if (is_refractive){
+    material = std::make_unique<RefractiveMaterial>();
+  }
+  else {
+    material = std::make_unique<DiffuseMaterial>();
+  }
+
+  material->ks = j["ks"];
+  material->kd = j["kd"];
+  material->specular_exp = j["specularexponent"];
+  material->diffuse_color = PPMColor(j["diffusecolor"]);
+  material->specular_color = PPMColor(j["specularcolor"]);
+  material->refractive_index = j["refractiveindex"];
+  material->reflectivity = j["reflectivity"];
+  material->texture = std::move(texture);
+
+  return std::move(material);
 }
 
 void Renderer::load_lights(nlohmann::json lights)
@@ -116,13 +127,13 @@ void Renderer::load_shapes(nlohmann::json shapes)
       std::vector<float> center = shape["center"];
       float radius = shape["radius"];
 
-      Material material;
+      std::unique_ptr<Material> material;
       if (shape.contains("material"))
       {
         material = load_material(shape["material"]);
       }
 
-      new_shape = std::make_shared<Sphere>(Vec3{center}, radius, material);
+      new_shape = std::make_shared<Sphere>(Vec3{center}, radius, std::move(material));
     }
     else if (type == "cylinder")
     {
@@ -131,13 +142,13 @@ void Renderer::load_shapes(nlohmann::json shapes)
       float radius = shape["radius"];
       float height = shape["height"];
 
-      Material material;
+      std::unique_ptr<Material> material;
       if (shape.contains("material"))
       {
         material = load_material(shape["material"]);
       }
       new_shape = std::make_shared<Cylinder>(Vec3{center}, Vec3{axis}, radius,
-                                             height, material);
+                                             height, std::move(material));
     }
     else if (type == "triangle")
     {
@@ -145,13 +156,13 @@ void Renderer::load_shapes(nlohmann::json shapes)
       std::vector<float> v1 = shape["v1"];
       std::vector<float> v2 = shape["v2"];
 
-      Material material;
+      std::unique_ptr<Material> material;
       if (shape.contains("material"))
       {
         material = load_material(shape["material"]);
       }
       new_shape =
-          std::make_shared<Triangle>(Vec3{v0}, Vec3{v1}, Vec3{v2}, material);
+          std::make_shared<Triangle>(Vec3{v0}, Vec3{v1}, Vec3{v2}, std::move(material));
     }
 
     if (new_shape != nullptr)

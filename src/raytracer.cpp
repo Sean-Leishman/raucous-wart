@@ -40,26 +40,25 @@ Vec3 PhongRaytracer::trace_ray(Ray& ray, int depth, Intersection& hit_info)
     return scene->bg_color.to_vec();
   }
 
-  const Material& material = hit_info.object->material;
-  if (material.is_reflective)
+  if (hit_info.object->material->is_reflective)
   {
     Ray reflect_ray = calculate_reflection_ray(ray, hit_info);
     hit_info.first_hit = false;
-    color = color * (1 - hit_info.object->material.reflectivity) +
+    color = color * (1 - hit_info.object->material->reflectivity) +
             trace_ray(reflect_ray, depth + 1, hit_info);
     return color;
   }
 
-  if (material.is_refractive)
+  if (hit_info.object->material->is_refractive)
   {
-    double refraction_ratio = hit_info.first_hit ? hit_info.object->material.refractive_index : (1/hit_info.object->material.refractive_index);
+    double refraction_ratio = hit_info.first_hit ? hit_info.object->material->refractive_index : (1/hit_info.object->material->refractive_index);
     Ray refract_ray = calculate_refraction_ray(ray, hit_info, refraction_ratio);
     hit_info.first_hit = false;
     color = color + trace_ray(refract_ray, depth + 1, hit_info);
     return color;
   }
 
-  Vec3 ambient = material.diffuse_color.to_vec() *
+  Vec3 ambient = hit_info.object->material->diffuse_color.to_vec() *
                  scene->ambient_light->intensity *
                  scene->ambient_light->color.to_vec();
   Vec3 direct = calculate_direct(hit_info);
@@ -71,16 +70,15 @@ Vec3 PhongRaytracer::trace_ray(Ray& ray, int depth, Intersection& hit_info)
 
 Vec3 PhongRaytracer::calculate_direct(Intersection& hit_info)
 {
-  const Material& material = hit_info.object->material;
 
   Vec3 view_dir = Vec3::normalize(camera->get_position() - hit_info.position);
   Vec3 color;
 
-  if (material.texture->loaded)
+  if (hit_info.object->material->texture->loaded)
   {
     Vec2 uv = hit_info.object->interpolate_uv(&hit_info);
     std::cout << hit_info.position << ":" << uv << std::endl;
-    color = material.texture->get_color(uv.u, uv.v).to_vec();
+    color = hit_info.object->material->texture->get_color(uv.u, uv.v).to_vec();
   }
 
   for (const auto& light : scene->lights)
@@ -97,12 +95,12 @@ Vec3 PhongRaytracer::calculate_direct(Intersection& hit_info)
     Vec3 H = Vec3::normalize(light_dir + view_dir);
 
     float NdotL = std::max(hit_info.normal.dot(light_dir), 0.0f);
-    Vec3 diffuse = material.diffuse_color.to_vec() * light->intensity *
-                   material.kd * NdotL;
+    Vec3 diffuse = hit_info.object->material->diffuse_color.to_vec() * light->intensity *
+                   hit_info.object->material->kd * NdotL;
 
     float NdotH = std::max(hit_info.normal.dot(H), 0.0f);
-    Vec3 specular = material.specular_color.to_vec() * light->intensity *
-                    material.ks * std::pow(NdotH, material.specular_exp);
+    Vec3 specular = hit_info.object->material->specular_color.to_vec() * light->intensity *
+                    hit_info.object->material->ks * std::pow(NdotH, hit_info.object->material->specular_exp);
 
     color = color + (diffuse + specular);
   }
@@ -195,31 +193,29 @@ Vec3 Pathtracer::trace_ray(Ray& ray, int depth)
   if (depth >= max_depth) return Vec3{0.0f,0.0f,0.0f};
 
   Intersection hit_info;
-  if (!scene->intersect(ray, hit_info)) return scene->bg_color.to_vec();
+  if (!scene->intersect_bvh(ray, hit_info)) return scene->bg_color.to_vec();
 
   Vec3 attenuation;
   Ray scattered;
-  const Material& material = hit_info.object->material;
 
   Vec3 direct_lighting = calculate_direct_lighting(ray, hit_info);
 
-  if (material.scatter(ray, hit_info, attenuation, scattered)) {
+  if (hit_info.object->material->scatter(ray, hit_info, attenuation, scattered)) {
       Vec3 color =  attenuation * trace_ray(scattered, depth + 1);
       return direct_lighting + color;
   }
 }
 
 Vec3 Pathtracer::calculate_direct_lighting(Ray& ray, Intersection& hit_info) {
-  const Material& material = hit_info.object->material;
 
   Vec3 view_dir = Vec3::normalize(camera->get_position() - hit_info.position);
   Vec3 color;
 
-  if (material.texture->loaded)
+  if (hit_info.object->material->texture->loaded)
   {
     Vec2 uv = hit_info.object->interpolate_uv(&hit_info);
     std::cout << hit_info.position << ":" << uv << std::endl;
-    color = material.texture->get_color(uv.u, uv.v).to_vec();
+    color = hit_info.object->material->texture->get_color(uv.u, uv.v).to_vec();
   }
 
   for (const auto& light : scene->lights)
@@ -236,12 +232,12 @@ Vec3 Pathtracer::calculate_direct_lighting(Ray& ray, Intersection& hit_info) {
     Vec3 H = Vec3::normalize(light_dir + view_dir);
 
     float NdotL = std::max(hit_info.normal.dot(light_dir), 0.0f);
-    Vec3 diffuse = material.diffuse_color.to_vec() * light->intensity *
-                   material.kd * NdotL;
+    Vec3 diffuse = hit_info.object->material->diffuse_color.to_vec() * light->intensity *
+                   hit_info.object->material->kd * NdotL;
 
     float NdotH = std::max(hit_info.normal.dot(H), 0.0f);
-    Vec3 specular = material.specular_color.to_vec() * light->intensity *
-                    material.ks * std::pow(NdotH, material.specular_exp);
+    Vec3 specular = hit_info.object->material->specular_color.to_vec() * light->intensity *
+                    hit_info.object->material->ks * std::pow(NdotH, hit_info.object->material->specular_exp);
 
     color = color + (diffuse + specular);
   }

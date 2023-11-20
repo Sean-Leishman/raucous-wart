@@ -68,11 +68,11 @@ class Shape : public std::enable_shared_from_this<Shape>
 {
   private:
   public:
-      Material material;
+      std::unique_ptr<Material> material;
       BoundingBox bbox;
 
   Shape();
-  Shape(Material material);
+  Shape(std::unique_ptr<Material> material);
   virtual ~Shape() = default;
 
   virtual std::shared_ptr<const Shape> get_shared_ptr() const = 0;
@@ -90,7 +90,7 @@ class Sphere : public Shape
   double radius;
 
   public:
-  Sphere(Vec3, float, Material);
+  Sphere(Vec3, float, std::unique_ptr<Material>);
 
   std::shared_ptr<const Shape> get_shared_ptr() const override
   {
@@ -110,7 +110,7 @@ class Cylinder : public Shape
   float height;
 
   public:
-  Cylinder(Vec3, Vec3, float, float, Material);
+  Cylinder(Vec3, Vec3, float, float, std::unique_ptr<Material>);
 
   std::shared_ptr<const Shape> get_shared_ptr() const override
   {
@@ -137,7 +137,7 @@ class Triangle : public Shape
 
   public:
   Triangle();
-  Triangle(Vec3, Vec3, Vec3, Material);
+  Triangle(Vec3, Vec3, Vec3, std::unique_ptr<Material>);
 
   std::shared_ptr<const Shape> get_shared_ptr() const override
   {

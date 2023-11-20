@@ -10,6 +10,7 @@
 #include "scene.hpp"
 
 #include <unordered_map>
+#include <memory>
 
 enum RenderMode
 {
@@ -32,7 +33,7 @@ class Renderer
 
   JSONParser parser;
 
-  Material load_material(nlohmann::json j);
+  std::unique_ptr<Material> load_material(nlohmann::json j);
   void load_shapes(nlohmann::json j);
   void load_lights(nlohmann::json j);
 

@@ -25,22 +25,47 @@ class Texture
 class Material
 {
   public:
-  float ks;
-  float kd;
-  int specular_exp;
+  float ks{};
+  float kd{};
+  int specular_exp{};
   PPMColor diffuse_color;
   PPMColor specular_color;
-  bool is_reflective;
-  float reflectivity;
-  bool is_refractive;
-  float refractive_index;
+  bool is_reflective{};
+  float reflectivity{};
+  bool is_refractive{};
+  float refractive_index{};
 
   std::shared_ptr<Texture> texture;
 
   Material();
+  Material(const Material&);
   Material(float, float, int, PPMColor, PPMColor, bool, float, bool, float,
            std::string);
 
-  bool scatter(Ray& ray, Intersection& hit_info, Vec3& attenuation,
-               Ray& scattered) const;
+  virtual bool scatter(Ray& ray, Intersection& hit_info, Vec3& attenuation,
+               Ray& scattered) const = 0;
+};
+
+class DiffuseMaterial: public Material{
+  public:
+      DiffuseMaterial(){};
+  DiffuseMaterial(const Material& mat);
+  bool scatter(Ray& ray, Intersection& hit_info, Vec3& attenuation, Ray& scattered) const override;
+
+};
+
+class ReflectiveMaterial: public Material{
+  public:
+      ReflectiveMaterial(){};
+      ReflectiveMaterial(const Material& mat);
+  bool scatter(Ray& ray, Intersection& hit_info, Vec3& attenuation, Ray& scattered) const override;
+
+};
+
+class RefractiveMaterial: public Material{
+  public:
+      RefractiveMaterial(){};
+  RefractiveMaterial(const Material& mat);
+  bool scatter(Ray& ray, Intersection& hit_info, Vec3& attenuation, Ray& scattered) const override;
+
 };

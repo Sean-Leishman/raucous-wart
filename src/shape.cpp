@@ -6,16 +6,17 @@
 
 
 #include <cmath>
+#include <utility>
 
 #define EPSILON 0.00000001f
 
 
 
-Shape::Shape() : material(Material()){};
-Shape::Shape(Material material) : material(material){};
+Shape::Shape(){};
+Shape::Shape(std::unique_ptr<Material> material) : material(std::move(material)){};
 
-Sphere::Sphere(Vec3 center, float radius, Material material)
-    : center(center), radius(radius), Shape(material){
+Sphere::Sphere(Vec3 center, float radius, std::unique_ptr<Material> material)
+    : center(center), radius(radius), Shape(std::move(material)){
       bbox = {center - radius, center+radius};
                                       };
 
@@ -72,9 +73,9 @@ Vec2 Sphere::interpolate_uv(const Intersection* hit_info) const
 }
 
 Cylinder::Cylinder(Vec3 center, Vec3 axis, float radius, float height,
-                   Material material)
+                   std::unique_ptr<Material> material)
     : center(center), axis(axis), radius(radius), height(height),
-      Shape(material){
+      Shape(std::move(material)){
   bbox = {
       Vec3{static_cast<float>(center.x - radius), static_cast<float>(center.y), static_cast<float>(center.z - radius)},
       Vec3{static_cast<float>(center.x + radius), static_cast<float>(center.y + height), static_cast<float>(center.z + radius)}
@@ -114,10 +115,9 @@ bool Cylinder::intersect(const Ray& ray, float tmin, float tmax,
                          Intersection* intersection) const
 {
   Quaternion rotation = rotation_from_to(axis, Vec3(0.0f, 1.0f, 0.0f));
-  Vec3 transform_ray_origin = rotate_vector(ray.origin - center, rotation);
+  Vec3 oc = rotate_vector(ray.origin - center, rotation);
   Vec3 transform_ray_dir = rotate_vector(ray.direction, rotation);
 
-  Vec3 oc = transform_ray_origin;
   Vec3 dir = Vec3::normalize(transform_ray_dir);
   float a = dir.x * dir.x + dir.z * dir.z;
   float b = 2.0f * (oc.x * dir.x + oc.z * dir.z);
@@ -157,7 +157,7 @@ bool Cylinder::intersect(const Ray& ray, float tmin, float tmax,
 
   // Get the intersection point
   Vec3 point =
-      ray.point_at_parameter(transform_ray_origin, transform_ray_dir, t);
+      ray.point_at_parameter(oc, transform_ray_dir, t);
 
   float half_height = height;
   if (point.y < -half_height || point.y > half_height)
@@ -199,15 +199,15 @@ Vec2 Cylinder::interpolate_uv(const Intersection* hit_info) const
   return {u, v};
 }
 
-Triangle::Triangle() : v0(Vec3()), v1(Vec3()), v2(Vec3()), Shape(Material())
+Triangle::Triangle() : v0(Vec3()), v1(Vec3()), v2(Vec3()), Shape(std::unique_ptr<Material>())
 {
   uv0 = get_uv(v0);
   uv1 = get_uv(v1);
   uv2 = get_uv(v2);
 }
 
-Triangle::Triangle(Vec3 v0, Vec3 v1, Vec3 v2, Material material)
-    : v0(v0), v1(v1), v2(v2), Shape(material)
+Triangle::Triangle(Vec3 v0, Vec3 v1, Vec3 v2, std::unique_ptr<Material> material)
+    : v0(v0), v1(v1), v2(v2), Shape(std::move(material))
 {
   uv0 = get_uv(v0);
   uv1 = get_uv(v1);
