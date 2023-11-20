@@ -14,6 +14,7 @@ void Renderer::render_frame()
 {
   scene.build_bvh();
 
+#pragma omp parallel for
   for (int x = 0; x < image_width; ++x)
   {
     for (int y = 0; y < image_height; ++y)
@@ -63,7 +64,7 @@ std::unique_ptr<Material> Renderer::load_material(nlohmann::json j)
     material = std::make_unique<ReflectiveMaterial>();
   }
   else if (is_refractive){
-    material = std::make_unique<RefractiveMaterial>();
+    material = std::make_unique<ReflectiveMaterial>();
   }
   else {
     material = std::make_unique<DiffuseMaterial>();
@@ -77,7 +78,8 @@ std::unique_ptr<Material> Renderer::load_material(nlohmann::json j)
   material->refractive_index = j["refractiveindex"];
   material->reflectivity = j["reflectivity"];
   material->texture = std::move(texture);
-
+  material->is_reflective = is_reflective;
+  material->is_refractive = is_refractive;
   return std::move(material);
 }
 
@@ -89,6 +91,8 @@ void Renderer::load_lights(nlohmann::json lights)
   {
     std::string type = light["type"];
     std::shared_ptr<Light> new_light;
+    std::shared_ptr<Shape> new_shape;
+
     if (type == "pointlight")
     {
       std::vector<float> position = light["position"];
@@ -110,8 +114,11 @@ void Renderer::load_lights(nlohmann::json lights)
       std::vector<float> size = light["size"];
       std::vector<float> normal = light["normal"];
 
-      new_light = std::make_shared<AreaLight>(position, intensity, normal, size);
-      scene.lights.push_back(new_light);
+      auto light = AreaLight(position, intensity, normal, size);
+      new_light = std::make_shared<AreaLight>(light);
+      std::unique_ptr<Material> mat = std::make_unique<EmissiveMaterial>(DiffuseMaterial(), light);
+      new_shape = std::make_shared<Sphere>(Vec3{position}, size[0] * 0.1, std::move(mat));
+      scene.shapes.push_back(new_shape);
     }
   }
 }

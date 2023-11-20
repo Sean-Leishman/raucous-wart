@@ -2,6 +2,7 @@
 
 #include "image.hpp"
 #include "intersection.hpp"
+#include "light.hpp"
 #include "ray.hpp"
 
 #include <memory>
@@ -42,6 +43,7 @@ class Material
   Material(float, float, int, PPMColor, PPMColor, bool, float, bool, float,
            std::string);
 
+  virtual Vec3 emission() const = 0;
   virtual bool scatter(Ray& ray, Intersection& hit_info, Vec3& attenuation,
                Ray& scattered) const = 0;
 };
@@ -51,7 +53,7 @@ class DiffuseMaterial: public Material{
       DiffuseMaterial(){};
   DiffuseMaterial(const Material& mat);
   bool scatter(Ray& ray, Intersection& hit_info, Vec3& attenuation, Ray& scattered) const override;
-
+  Vec3 emission() const override {return {};};
 };
 
 class ReflectiveMaterial: public Material{
@@ -59,7 +61,7 @@ class ReflectiveMaterial: public Material{
       ReflectiveMaterial(){};
       ReflectiveMaterial(const Material& mat);
   bool scatter(Ray& ray, Intersection& hit_info, Vec3& attenuation, Ray& scattered) const override;
-
+  Vec3 emission() const override {return {};};
 };
 
 class RefractiveMaterial: public Material{
@@ -67,5 +69,15 @@ class RefractiveMaterial: public Material{
       RefractiveMaterial(){};
   RefractiveMaterial(const Material& mat);
   bool scatter(Ray& ray, Intersection& hit_info, Vec3& attenuation, Ray& scattered) const override;
+  Vec3 emission() const override {return {};};
+};
 
+class EmissiveMaterial: public Material {
+  public:
+      AreaLight light;
+      EmissiveMaterial(){};
+      EmissiveMaterial(const Material&, const AreaLight&);
+
+      bool scatter(Ray& ray, Intersection& hit_info, Vec3& attenuation, Ray& scattered) const override;
+      Vec3 emission() const override {return light.color.to_vec();};
 };

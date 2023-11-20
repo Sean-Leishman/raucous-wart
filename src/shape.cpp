@@ -147,7 +147,7 @@ bool Cylinder::intersect(const Ray& ray, float tmin, float tmax,
 
       intersection->position =
           rotate_vector(intersection->position, rotation) + center;
-      intersection->normal = rotate_vector(intersection->normal, rotation);
+      intersection->normal = rotate_vector(intersection->normal, rotation) * -1;
       intersection->object = get_shared_ptr();
       intersection->type = CAPS;
 
@@ -167,7 +167,7 @@ bool Cylinder::intersect(const Ray& ray, float tmin, float tmax,
       return false;
     intersection->position =
         rotate_vector(intersection->position, rotation) + center;
-    intersection->normal = rotate_vector(intersection->normal, rotation);
+    intersection->normal = rotate_vector(intersection->normal, rotation) * -1;
     intersection->object = get_shared_ptr();
     return true; // Both intersection points are out of bounds
   }
@@ -302,3 +302,4 @@ Vec2 Triangle::interpolate_uv(const Intersection* hit_info) const
 
   return {u, v};
 }
+

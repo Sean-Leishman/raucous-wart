@@ -177,12 +177,16 @@ Vec3 rotate_vector(const Vec3& v, const Quaternion& q);
 inline Vec3 random_in_unit_sphere() {
       while (true) {
         auto p = Vec3::random(-1,1);
-        if (p.dot(p) < 1)
-      return p;
+        if (p.dot(p) < 1) {
+          return p;
+        }
       }
+
 }
 
 inline Vec3 random_unit_vector()
 {
-      return Vec3::normalize(random_in_unit_sphere());
+      Vec3 v = random_in_unit_sphere();
+      Vec3::normalize(v);
+      return v;
 }

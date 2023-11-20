@@ -1,0 +1,7 @@
+C:\WINDOWS\system32\wsl.exe --distribution Ubuntu --exec /bin/bash -c "export CMAKE_COLOR_DIAGNOSTICS=ON && export CLION_IDE=TRUE && export JETBRAINS_IDE=TRUE && cd /home/seanleishman/university/raucous_wart/cmake-build-release && /usr/bin/cmake -DCMAKE_BUILD_TYPE=Release -G 'CodeBlocks - Unix Makefiles' -S /home/seanleishman/university/raucous_wart -B /home/seanleishman/university/raucous_wart/cmake-build-release"
+PROJECT_SOURCE_DIR="/home/seanleishman/university/raucous_wart"
+CMAKE_MODULE_PATH="/home/seanleishman/university/raucous_wart/cmake"
+SOURCES="/home/seanleishman/university/raucous_wart/src/bvh.cpp/home/seanleishman/university/raucous_wart/src/camera.cpp/home/seanleishman/university/raucous_wart/src/image.cpp/home/seanleishman/university/raucous_wart/src/input.cpp/home/seanleishman/university/raucous_wart/src/light.cpp/home/seanleishman/university/raucous_wart/src/material.cpp/home/seanleishman/university/raucous_wart/src/ray.cpp/home/seanleishman/university/raucous_wart/src/raytracer.cpp/home/seanleishman/university/raucous_wart/src/renderer.cpp/home/seanleishman/university/raucous_wart/src/scene.cpp/home/seanleishman/university/raucous_wart/src/shape.cpp/home/seanleishman/university/raucous_wart/src/vector.cpp"
+-- Configuring done
+-- Generating done
+-- Build files have been written to: /home/seanleishman/university/raucous_wart/cmake-build-release

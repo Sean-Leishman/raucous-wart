@@ -7,8 +7,10 @@ message(PROJECT_SOURCE_DIR="${PROJECT_SOURCE_DIR}")
 message(CMAKE_MODULE_PATH="${CMAKE_MODULE_PATH}")
 # find_package(spdlog REQUIRED)
 
-set(CMAKE_BUILD_TYPE Debug)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+set(CMAKE_CXX_FLAGS "-Wall -Wextra")
+set(CMAKE_CXX_FLAGS_DEBUG "-g")
+set(CMAKE_CXX_FLAGS_RELEASE "-O3 -march=native -fopenmp -ffast-math")
 
 add_subdirectory(src)
 

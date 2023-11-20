@@ -26,7 +26,14 @@ BVHTree::_buildBVH(std::vector<std::shared_ptr<Shape>> objects)
   auto [leftObjects, rightObjects] = split_objects(objects);
 
   if (leftObjects.size() == 0 || rightObjects.size() == 0) {
-    auto node = std::make_unique<BVHNode>(std::move(objects));
+    if (leftObjects.size() > 0){
+      auto node = std::make_unique<BVHNode>(std::move(leftObjects));
+      return node;
+    }
+    else{
+      auto node = std::make_unique<BVHNode>(std::move(rightObjects));
+      return node;
+    }
   }
 
   std::unique_ptr<BVHNode> leftChild = _buildBVH(leftObjects);
@@ -101,7 +108,6 @@ BVHTree::split_objects(BVHTree::Shapes& objects)
 
 }
 
-
 bool BVHTree::intersectBVH(Ray& ray, Intersection& hit_info)
 {
   return intersectBVH(root.get(), ray, hit_info);
@@ -134,7 +140,4 @@ bool BVHTree::intersectBVH(BVHNode* node, Ray& ray, Intersection& hit_info)
   bool hit_left = intersectBVH(node->left.get(), ray, hit_info);
   bool hit_right = intersectBVH(node->right.get(), ray, hit_info);
   return hit_left || hit_right;
-
-
-
 }

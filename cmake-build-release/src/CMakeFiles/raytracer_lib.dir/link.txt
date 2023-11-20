@@ -1,0 +1,2 @@
+/usr/bin/ar qc libraytracer_lib.a CMakeFiles/raytracer_lib.dir/bvh.cpp.o CMakeFiles/raytracer_lib.dir/camera.cpp.o CMakeFiles/raytracer_lib.dir/image.cpp.o CMakeFiles/raytracer_lib.dir/input.cpp.o CMakeFiles/raytracer_lib.dir/light.cpp.o CMakeFiles/raytracer_lib.dir/material.cpp.o CMakeFiles/raytracer_lib.dir/ray.cpp.o CMakeFiles/raytracer_lib.dir/raytracer.cpp.o CMakeFiles/raytracer_lib.dir/renderer.cpp.o CMakeFiles/raytracer_lib.dir/scene.cpp.o CMakeFiles/raytracer_lib.dir/shape.cpp.o CMakeFiles/raytracer_lib.dir/vector.cpp.o
+/usr/bin/ranlib libraytracer_lib.a

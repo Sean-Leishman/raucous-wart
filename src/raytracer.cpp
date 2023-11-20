@@ -177,6 +177,7 @@ Ray PhongRaytracer::calculate_reflection_ray(Ray& ray, Intersection& hit_info)
 PPMColor Pathtracer::trace_ray(Ray& ray)
 {
   Vec3 final_color;
+#pragma omp parallel for
   for (int i=0; i<n_samples; i++)
   {
     Vec3 color{trace_ray(ray, 0)};
@@ -195,21 +196,39 @@ Vec3 Pathtracer::trace_ray(Ray& ray, int depth)
   Intersection hit_info;
   if (!scene->intersect_bvh(ray, hit_info)) return scene->bg_color.to_vec();
 
+  if (hit_info.object->name() == "Sphere"){
+    if (hit_info.object->material->is_refractive){
+      if (depth == 0) {
+//        std::cout << "here";
+      }
+      //std::cout << "here";
+    }
+  }
+
   Vec3 attenuation;
   Ray scattered;
 
-  Vec3 direct_lighting = calculate_direct_lighting(ray, hit_info);
+  Vec3 direct_lighting = Vec3{};
+  if (depth == 0) {
+   // direct_lighting = calculate_direct_lighting(ray, hit_info);
+  }
+
+// direct_lighting = calculate_direct_lighting(ray, hit_info);
 
   if (hit_info.object->material->scatter(ray, hit_info, attenuation, scattered)) {
-      Vec3 color =  attenuation * trace_ray(scattered, depth + 1);
-      return direct_lighting + color;
+      Vec3 indirect_light =  trace_ray(scattered, depth + 1);
+      return direct_lighting + attenuation * indirect_light;
   }
+
+  return direct_lighting + attenuation;
 }
 
 Vec3 Pathtracer::calculate_direct_lighting(Ray& ray, Intersection& hit_info) {
 
   Vec3 view_dir = Vec3::normalize(camera->get_position() - hit_info.position);
   Vec3 color;
+
+
 
   if (hit_info.object->material->texture->loaded)
   {
@@ -221,7 +240,7 @@ Vec3 Pathtracer::calculate_direct_lighting(Ray& ray, Intersection& hit_info) {
   for (const auto& light : scene->lights)
   {
     Vec3 light_dir = Vec3::normalize(light->get_position() - hit_info.position);
-    Ray shadow_ray{hit_info.position, light_dir};
+    Ray shadow_ray{hit_info.position + light_dir * 0.000001f, light_dir};
     Intersection shadow_hit;
 
     if (scene->object_in_shadow(shadow_ray, hit_info.object, &shadow_hit))
@@ -239,7 +258,13 @@ Vec3 Pathtracer::calculate_direct_lighting(Ray& ray, Intersection& hit_info) {
     Vec3 specular = hit_info.object->material->specular_color.to_vec() * light->intensity *
                     hit_info.object->material->ks * std::pow(NdotH, hit_info.object->material->specular_exp);
 
-    color = color + (diffuse + specular);
+    if (hit_info.object->material->is_reflective || hit_info.object->material->is_refractive){
+      color = color + specular;
+    }
+    else
+    {
+      color = color + (diffuse + specular);
+    }
   }
   return color;
 }

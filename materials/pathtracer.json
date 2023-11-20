@@ -1,6 +1,6 @@
 {
   "nbounces":8,
-  "nsamples": 8,
+  "nsamples": 500,
   "rendermode":"pathtracer",
   "camera":
   {
@@ -21,8 +21,8 @@
         "type":"arealight",
         "position":[0, 1.0, 0.5],
         "normal": [0, -0.3, -0.1],
-        "size": [4,4,0],
-        "intensity":[0.75, 0.75, 0.75]
+        "size": [2,4,0],
+        "intensity":[30, 30, 30]
       },
       {
         "type":"ambientlight",
@@ -34,6 +34,23 @@
       {
         "type":"sphere",
         "center": [-0.35, -0.2, 1],
+        "radius":0.3,
+        "material":
+        {
+          "ks":0.1,
+          "kd":0.9,
+          "specularexponent":20,
+          "diffusecolor":[0.8, 0.5, 0.5],
+          "specularcolor":[1.0,1.0,1.0],
+          "isreflective":true,
+          "reflectivity":1.0,
+          "isrefractive":false,
+          "refractiveindex":1.2
+        }
+      },
+      {
+        "type":"sphere",
+        "center": [0, -0.2, 0.1],
         "radius":0.3,
         "material":
         {
@@ -63,7 +80,7 @@
           "specularcolor":[1.0,1.0,1.0],
           "isreflective":false,
           "reflectivity":1.0,
-          "isrefractive":true,
+          "isrefractive":false,
           "refractiveindex":1.5
         }
       },
