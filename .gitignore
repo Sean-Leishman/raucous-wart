@@ -3,3 +3,4 @@ external/
 out/
 cmake-build-debug/
 .idea/
+cmake-build-release/

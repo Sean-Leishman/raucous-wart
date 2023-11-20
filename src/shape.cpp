@@ -74,13 +74,14 @@ Vec2 Sphere::interpolate_uv(const Intersection* hit_info) const
 
 Cylinder::Cylinder(Vec3 center, Vec3 axis, float radius, float height,
                    std::unique_ptr<Material> material)
-    : center(center), axis(axis), radius(radius), height(height),
-      Shape(std::move(material)){
+    : Shape(std::move(material)), center(center), axis(axis), radius(radius),
+      height(height){
   bbox = {
-      Vec3{static_cast<float>(center.x - radius), static_cast<float>(center.y), static_cast<float>(center.z - radius)},
+      Vec3{static_cast<float>(center.x - radius), static_cast<float>(center.y - height), static_cast<float>(center.z - radius)},
       Vec3{static_cast<float>(center.x + radius), static_cast<float>(center.y + height), static_cast<float>(center.z + radius)}
   };
       };
+      // Add for rotated cylinders
 
 bool Cylinder::intersect_caps(const Vec3& origin, const Vec3& direction,
                               float t, Intersection* intersection) const
@@ -93,7 +94,7 @@ bool Cylinder::intersect_caps(const Vec3& origin, const Vec3& direction,
   float tt = (half_height - origin.y) / direction.y;
   if (tt < 0)
   {
-    tt = (-half_height - origin.y) / direction.y;
+    tt = (half_height + origin.y) / direction.y;
   }
   if (tt < 0)
   {
@@ -106,7 +107,7 @@ bool Cylinder::intersect_caps(const Vec3& origin, const Vec3& direction,
     intersection->position = p;
     intersection->distance = t;
     intersection->normal =
-        (t * direction.y > 0) ? Vec3(0.0f, -1.0f, 0.0f) : Vec3(0.0f, 1.0f, 0.0f);
+        (p.y > center.y) ? Vec3(0.0f, 1.0f, 0.0f) : Vec3(0.0f, -1.0f, 0.0f);
     return true;
   }
   return false;
@@ -147,7 +148,7 @@ bool Cylinder::intersect(const Ray& ray, float tmin, float tmax,
 
       intersection->position =
           rotate_vector(intersection->position, rotation) + center;
-      intersection->normal = rotate_vector(intersection->normal, rotation) * -1;
+      intersection->normal = rotate_vector(intersection->normal, rotation);
       intersection->object = get_shared_ptr();
       intersection->type = CAPS;
 
@@ -167,7 +168,7 @@ bool Cylinder::intersect(const Ray& ray, float tmin, float tmax,
       return false;
     intersection->position =
         rotate_vector(intersection->position, rotation) + center;
-    intersection->normal = rotate_vector(intersection->normal, rotation) * -1;
+    intersection->normal = rotate_vector(intersection->normal, rotation);
     intersection->object = get_shared_ptr();
     return true; // Both intersection points are out of bounds
   }
