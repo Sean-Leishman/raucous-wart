@@ -204,6 +204,7 @@ int Renderer::load_file(const std::string& filename)
 
   auto scene_json = parser.get<nlohmann::json>("scene");
   auto bg = scene_json["backgroundcolor"];
+  scene.bg_color = PPMColor{bg};
 
   auto shapes = parser.get<std::vector<nlohmann::json>>("scene", "shapes");
   load_shapes(shapes);

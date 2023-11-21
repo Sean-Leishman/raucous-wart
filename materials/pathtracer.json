@@ -50,7 +50,24 @@
       },
       {
         "type":"sphere",
-        "center": [0, -0.2, 0.1],
+        "center": [0.3, -0.2, 0.1],
+        "radius":0.3,
+        "material":
+        {
+          "ks":0.1,
+          "kd":0.9,
+          "specularexponent":20,
+          "diffusecolor":[0.8, 0.5, 0.5],
+          "specularcolor":[1.0,1.0,1.0],
+          "isreflective":true,
+          "reflectivity":0.5,
+          "isrefractive":true,
+          "refractiveindex":1.8
+        }
+      },
+      {
+        "type":"sphere",
+        "center": [-0.3, -0.2, 0.1],
         "radius":0.3,
         "material":
         {
@@ -60,7 +77,7 @@
           "diffusecolor":[0.8, 0.5, 0.5],
           "specularcolor":[1.0,1.0,1.0],
           "isreflective":false,
-          "reflectivity":1.0,
+          "reflectivity":0.5,
           "isrefractive":true,
           "refractiveindex":1.8
         }

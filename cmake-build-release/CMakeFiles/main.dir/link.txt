@@ -1,1 +1,0 @@
-/usr/bin/c++ -Wall -Wextra -O3 -march=native -fopenmp -ffast-math CMakeFiles/main.dir/main.cpp.o -o main  src/libraytracer_lib.a 

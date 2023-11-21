@@ -1,4 +1,4 @@
-# Install script for directory: /home/seanleishman/university/raucous_wart/src
+# Install script for directory: /home/seanleishman/University/cg/cw2/src
 
 # Set the install prefix
 if(NOT DEFINED CMAKE_INSTALL_PREFIX)

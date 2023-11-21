@@ -31,6 +31,11 @@ bool DiffuseMaterial::scatter(Ray& ray, Intersection& hit_info, Vec3& attenuatio
   return true;
 }
 
+bool DiffuseMaterial::get_new_ray(Ray& ray, Intersection& hit_info, Vec3& attenuation, Ray& scattered) const {
+  attenuation = diffuse_color.to_vec() * kd;
+  return false;
+}
+
 ReflectiveMaterial::ReflectiveMaterial(const Material& mat): Material(mat){}
 bool ReflectiveMaterial::scatter(Ray& ray, Intersection& hit_info, Vec3& attenuation, Ray& scattered) const
 {
@@ -57,9 +62,6 @@ bool ReflectiveMaterial::scatter(Ray& ray, Intersection& hit_info, Vec3& attenua
   Vec3 dir;
   if (is_reflective && !is_refractive) {
     dir = Vec3::reflect(unit_dir, hit_info.normal);
-    if (cannot_refract || r0 > random_double()) {
-      dir = Vec3::reflect(unit_dir, hit_info.normal);
-    }
   }
   if (is_refractive && !is_reflective){
       if (!is_front_face){
@@ -78,7 +80,7 @@ bool ReflectiveMaterial::scatter(Ray& ray, Intersection& hit_info, Vec3& attenua
         dir = Vec3::refract(unit_dir, hit_info.normal * -1, ir);
       }
       else{
-        dir = Vec3::refract(unit_dir, hit_info.normal, ir);
+        dir = Vec3::refract(unit_dir, hit_info.normal, 1/ir);
       }
     }
   }
@@ -88,6 +90,10 @@ bool ReflectiveMaterial::scatter(Ray& ray, Intersection& hit_info, Vec3& attenua
   unit_dir = Vec3::normalize(dir);
   scattered = Ray(hit_info.position + unit_dir * 0.000001f, unit_dir);
   return true;
+}
+
+bool ReflectiveMaterial::get_new_ray(Ray& ray, Intersection& hit_info, Vec3& attenuation, Ray& scattered) const {
+  return scatter(ray, hit_info, attenuation, scattered);
 }
 
 RefractiveMaterial::RefractiveMaterial(const Material& mat): Material(mat){}
@@ -101,6 +107,10 @@ bool RefractiveMaterial::scatter(Ray& ray, Intersection& hit_info, Vec3& attenua
   return true;
 }
 
+bool RefractiveMaterial::get_new_ray(Ray& ray, Intersection& hit_info, Vec3& attenuation, Ray& scattered) const {
+  return scatter(ray, hit_info, attenuation, scattered);
+}
+
 EmissiveMaterial::EmissiveMaterial(const Material& mat, const AreaLight& light): Material(mat), light(light){}
 bool EmissiveMaterial::scatter(Ray& ray, Intersection& hit_info, Vec3& attenuation, Ray& scattered) const
 {
@@ -108,3 +118,8 @@ bool EmissiveMaterial::scatter(Ray& ray, Intersection& hit_info, Vec3& attenuati
  return false;
 }
 
+bool EmissiveMaterial::get_new_ray(Ray& ray, Intersection& hit_info,
+                                   Vec3& attenuation, Ray& scattered) const
+{
+ return false;
+}
