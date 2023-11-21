@@ -42,7 +42,8 @@
           "isreflective":false,
           "reflectivity":0.9,
           "isrefractive":false,
-          "refractiveindex":1.0
+          "refractiveindex":1.0,
+          "texture":"/materials/vwvwvw.ppm"
         }
       },
       {
@@ -78,7 +79,8 @@
           "isreflective":false,
           "reflectivity":1.0,
           "isrefractive":false,
-          "refractiveindex":1.0
+          "refractiveindex":1.0,
+          "texture":"/materials/earth.ppm"
         }
       },
       {
@@ -96,7 +98,8 @@
           "isreflective":false,
           "reflectivity":1.0,
           "isrefractive":false,
-          "refractiveindex":1.0
+          "refractiveindex":1.0,
+          "texture":"/materials/spots.ppm"
         }
       },
       {

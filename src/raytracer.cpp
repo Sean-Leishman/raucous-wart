@@ -4,7 +4,6 @@
 #include "renderer.hpp"
 #include "scene.hpp"
 
-
 PPMColor BinaryRaytracer::trace_ray(Ray& ray)
 {
   Intersection hit_info;
@@ -50,7 +49,9 @@ Vec3 PhongRaytracer::trace_ray(Ray& ray, int depth, Intersection& hit_info)
 
   if (hit_info.object->material->is_refractive)
   {
-    double refraction_ratio = hit_info.first_hit ? hit_info.object->material->refractive_index : (1/hit_info.object->material->refractive_index);
+    double refraction_ratio =
+        hit_info.first_hit ? hit_info.object->material->refractive_index
+                           : (1 / hit_info.object->material->refractive_index);
     Ray refract_ray = calculate_refraction_ray(ray, hit_info, refraction_ratio);
     color = color + trace_ray(refract_ray, depth + 1, hit_info);
     return color;
@@ -93,19 +94,21 @@ Vec3 PhongRaytracer::calculate_direct(Intersection& hit_info)
     Vec3 H = Vec3::normalize(light_dir + view_dir);
 
     float NdotL = std::max(hit_info.normal.dot(light_dir), 0.0f);
-    Vec3 diffuse = hit_info.object->material->diffuse_color.to_vec() * light->intensity *
-                   hit_info.object->material->kd * NdotL;
+    Vec3 diffuse = hit_info.object->material->diffuse_color.to_vec() *
+                   light->intensity * hit_info.object->material->kd * NdotL;
 
     float NdotH = std::max(hit_info.normal.dot(H), 0.0f);
-    Vec3 specular = hit_info.object->material->specular_color.to_vec() * light->intensity *
-                    hit_info.object->material->ks * std::pow(NdotH, hit_info.object->material->specular_exp);
+    Vec3 specular = hit_info.object->material->specular_color.to_vec() *
+                    light->intensity * hit_info.object->material->ks *
+                    std::pow(NdotH, hit_info.object->material->specular_exp);
 
     color = color + (diffuse + specular);
   }
   return color;
 }
 
-Ray PhongRaytracer::calculate_refraction_ray(Ray& ray, Intersection& hit_info, double ir)
+Ray PhongRaytracer::calculate_refraction_ray(Ray& ray, Intersection& hit_info,
+                                             double ir)
 {
   bool is_front_face = false;
   // dependent on normal of intersection
@@ -142,7 +145,7 @@ PPMColor Pathtracer::trace_ray(Ray& ray)
 {
   Vec3 final_color;
 #pragma omp parallel for
-  for (int i=0; i<n_samples; i++)
+  for (int i = 0; i < n_samples; i++)
   {
     Vec3 color{trace_ray(ray, 0)};
     final_color = final_color + color;
@@ -155,17 +158,20 @@ PPMColor Pathtracer::trace_ray(Ray& ray)
 
 Vec3 Pathtracer::trace_ray(Ray& ray, int depth)
 {
-  if (depth >= max_depth) return Vec3{0.0f,0.0f,0.0f};
+  if (depth >= max_depth)
+    return Vec3{0.0f, 0.0f, 0.0f};
 
   Intersection hit_info;
-  if (!scene->intersect_bvh(ray, hit_info)) return scene->bg_color.to_vec();
+  if (!scene->intersect_bvh(ray, hit_info))
+    return scene->bg_color.to_vec();
 
   Vec3 attenuation;
   Ray scattered;
 
-  if (hit_info.object->material->scatter(ray, hit_info, attenuation, scattered)) {
-      Vec3 indirect_light =  trace_ray(scattered, depth + 1);
-      return attenuation * indirect_light;
+  if (hit_info.object->material->scatter(ray, hit_info, attenuation, scattered))
+  {
+    Vec3 indirect_light = trace_ray(scattered, depth + 1);
+    return attenuation * indirect_light;
   }
 
   return attenuation;

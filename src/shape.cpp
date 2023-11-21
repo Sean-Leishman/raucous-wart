@@ -4,26 +4,26 @@
 #include "ray.hpp"
 #include "vector.hpp"
 
-
 #include <cmath>
 #include <utility>
 
 #define EPSILON 0.00000001f
 
-
-
 Shape::Shape(){};
-Shape::Shape(std::unique_ptr<Material> material) : material(std::move(material)){};
+Shape::Shape(std::unique_ptr<Material> material)
+    : material(std::move(material)){};
 
 Sphere::Sphere(Vec3 center, float radius, std::unique_ptr<Material> material)
-    : center(center), radius(radius), Shape(std::move(material)){
-      bbox = {center - radius, center+radius};
-                                      };
+    : center(center), radius(radius), Shape(std::move(material))
+{
+  bbox = {center - radius, center + radius};
+};
 
-                                     std::ostream& operator<<(std::ostream& os, const Shape& shape) {
-os << "Area: " << shape.name();
-return os;
-                }
+std::ostream& operator<<(std::ostream& os, const Shape& shape)
+{
+  os << "Area: " << shape.name();
+  return os;
+}
 
 bool Sphere::intersect(const Ray& ray, float tmin, float tmax,
                        Intersection* intersection) const
@@ -34,40 +34,46 @@ bool Sphere::intersect(const Ray& ray, float tmin, float tmax,
   float c = oc.dot(oc) - radius * radius;
   float discriminant = b * b - a * c;
 
-  if (discriminant < 0) return false;
+  if (discriminant < 0)
+    return false;
 
-    float temp = (-b - std::sqrt(discriminant)) / a;
-    if (temp < tmax && temp > tmin)
-    {
-      intersection->distance = temp;
-      intersection->position = ray.point_at_parameter(intersection->distance);
-      intersection->normal =
-          Vec3::normalize((intersection->position - center) / radius);
-      intersection->object = get_shared_ptr();
-      return true;
-    }
-    temp = (-b + std::sqrt(discriminant)) / a;
-    if (temp < tmax && temp > tmin)
-    {
-      intersection->distance = temp;
-      intersection->position = ray.point_at_parameter(intersection->distance);
-      intersection->normal =
-          Vec3::normalize((intersection->position - center) / radius);
-      intersection->object = get_shared_ptr();
-      return true;
-    }
-     return false;
+  float temp = (-b - std::sqrt(discriminant)) / a;
+  if (temp < tmax && temp > tmin)
+  {
+    intersection->distance = temp;
+    intersection->position = ray.point_at_parameter(intersection->distance);
+    intersection->normal =
+        Vec3::normalize((intersection->position - center) / radius);
+    intersection->object = get_shared_ptr();
+    return true;
+  }
+  temp = (-b + std::sqrt(discriminant)) / a;
+  if (temp < tmax && temp > tmin)
+  {
+    intersection->distance = temp;
+    intersection->position = ray.point_at_parameter(intersection->distance);
+    intersection->normal =
+        Vec3::normalize((intersection->position - center) / radius);
+    intersection->object = get_shared_ptr();
+    return true;
+  }
+  return false;
 }
 
 Vec2 Sphere::interpolate_uv(const Intersection* hit_info) const
 {
   Vec3 point = hit_info->position;
+  point = point - center;
+  point = point * -1;
 
-  float theta = atan2(point.y, point.x);
-  float phi = asin(point.z);
+  float theta = atan2(point.z, point.x);
+  float phi = asin(point.y / radius);
 
-  float u = (theta + M_PI) / (2 * M_PI);
-  float v = (phi + M_PI / 2) / M_PI;
+  float u = (theta) / (2 * M_PI) + 0.5f;
+  float v = phi / (M_PI) + 0.5;
+
+  std::cout << "Sphere: " << u << ", " << v << ", " << theta << ", " << phi
+            << ", " << point << std::endl;
 
   return {u, v};
 }
@@ -75,13 +81,16 @@ Vec2 Sphere::interpolate_uv(const Intersection* hit_info) const
 Cylinder::Cylinder(Vec3 center, Vec3 axis, float radius, float height,
                    std::unique_ptr<Material> material)
     : Shape(std::move(material)), center(center), axis(axis), radius(radius),
-      height(height){
-  bbox = {
-      Vec3{static_cast<float>(center.x - radius), static_cast<float>(center.y - height), static_cast<float>(center.z - radius)},
-      Vec3{static_cast<float>(center.x + radius), static_cast<float>(center.y + height), static_cast<float>(center.z + radius)}
-  };
-      };
-      // Add for rotated cylinders
+      height(height)
+{
+  bbox = {Vec3{static_cast<float>(center.x - radius),
+               static_cast<float>(center.y - height),
+               static_cast<float>(center.z - radius)},
+          Vec3{static_cast<float>(center.x + radius),
+               static_cast<float>(center.y + height),
+               static_cast<float>(center.z + radius)}};
+};
+// Add for rotated cylinders
 
 bool Cylinder::intersect_caps(const Vec3& origin, const Vec3& direction,
                               float t, Intersection* intersection) const
@@ -157,8 +166,7 @@ bool Cylinder::intersect(const Ray& ray, float tmin, float tmax,
   }
 
   // Get the intersection point
-  Vec3 point =
-      ray.point_at_parameter(oc, transform_ray_dir, t);
+  Vec3 point = ray.point_at_parameter(oc, transform_ray_dir, t);
 
   float half_height = height;
   if (point.y < -half_height || point.y > half_height)
@@ -190,34 +198,37 @@ bool Cylinder::intersect(const Ray& ray, float tmin, float tmax,
 Vec2 Cylinder::interpolate_uv(const Intersection* hit_info) const
 {
   Vec3 point = hit_info->position;
+  point = point - center;
+  point = point * -1;
 
-  float theta = atan2(point.y, point.x);
-  float u = (theta + M_PI) / (2 * M_PI);
-  float min_height = center.z - height;
-  float max_height = center.z + height;
-  float v = (point.z - min_height) / (max_height - min_height);
+  float theta = atan2(point.z, point.x);
+  float u = theta / (2 * M_PI) + 0.5f;
+  float min_height = center.y - height;
+  float v = 0.5f + point.y / (2 * height);
 
   return {u, v};
 }
 
-Triangle::Triangle() : v0(Vec3()), v1(Vec3()), v2(Vec3()), Shape(std::unique_ptr<Material>())
+Triangle::Triangle()
+    : v0(Vec3()), v1(Vec3()), v2(Vec3()), Shape(std::unique_ptr<Material>())
 {
   uv0 = get_uv(v0);
   uv1 = get_uv(v1);
   uv2 = get_uv(v2);
 }
 
-Triangle::Triangle(Vec3 v0, Vec3 v1, Vec3 v2, std::unique_ptr<Material> material)
+Triangle::Triangle(Vec3 v0, Vec3 v1, Vec3 v2,
+                   std::unique_ptr<Material> material)
     : v0(v0), v1(v1), v2(v2), Shape(std::move(material))
 {
   uv0 = get_uv(v0);
   uv1 = get_uv(v1);
   uv2 = get_uv(v2);
 
-  bbox = {
-      Vec3{std::min({v0.x, v1.x, v2.x}), std::min({v0.y, v1.y, v2.y}), std::min({v0.z, v1.z, v2.z})},
-      Vec3{std::max({v0.x, v1.x, v2.x}), std::max({v0.y, v1.y, v2.y}), std::max({v0.z, v1.z, v2.z})}
-  };
+  bbox = {Vec3{std::min({v0.x, v1.x, v2.x}), std::min({v0.y, v1.y, v2.y}),
+               std::min({v0.z, v1.z, v2.z})},
+          Vec3{std::max({v0.x, v1.x, v2.x}), std::max({v0.y, v1.y, v2.y}),
+               std::max({v0.z, v1.z, v2.z})}};
 };
 
 bool Triangle::intersect(const Ray& ray, float tmin, float tmax,
@@ -303,4 +314,3 @@ Vec2 Triangle::interpolate_uv(const Intersection* hit_info) const
 
   return {u, v};
 }
-

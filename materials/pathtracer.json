@@ -78,7 +78,7 @@
           "specularcolor":[1.0,1.0,1.0],
           "isreflective":false,
           "reflectivity":0.5,
-          "isrefractive":true,
+          "isrefractive":false,
           "refractiveindex":1.8
         }
       },

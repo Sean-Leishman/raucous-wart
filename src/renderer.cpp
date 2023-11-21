@@ -60,13 +60,20 @@ std::unique_ptr<Material> Renderer::load_material(nlohmann::json j)
   }
 
   std::unique_ptr<Material> material;
-  if (is_reflective) {
+  if (is_reflective && is_reflective)
+  {
+    material = std::make_unique<RRMaterial>();
+  }
+  else if (is_reflective)
+  {
     material = std::make_unique<ReflectiveMaterial>();
   }
-  else if (is_refractive){
-    material = std::make_unique<ReflectiveMaterial>();
+  else if (is_refractive)
+  {
+    material = std::make_unique<RefractiveMaterial>();
   }
-  else {
+  else
+  {
     material = std::make_unique<DiffuseMaterial>();
   }
 
@@ -85,8 +92,8 @@ std::unique_ptr<Material> Renderer::load_material(nlohmann::json j)
 
 void Renderer::load_lights(nlohmann::json lights)
 {
-  scene.ambient_light =
-      std::make_shared<AmbientLight>(Vec3(0.0f, 0.0f, 0.0f), Vec3(0.0f, 0.0f, 0.0f));
+  scene.ambient_light = std::make_shared<AmbientLight>(Vec3(0.0f, 0.0f, 0.0f),
+                                                       Vec3(0.0f, 0.0f, 0.0f));
   for (const auto& light : lights)
   {
     std::string type = light["type"];
@@ -108,7 +115,8 @@ void Renderer::load_lights(nlohmann::json lights)
       new_light = std::make_shared<AmbientLight>(intensity, color);
       scene.ambient_light = new_light;
     }
-    else if (type == "arealight"){
+    else if (type == "arealight")
+    {
       std::vector<float> position = light["position"];
       std::vector<float> intensity = light["intensity"];
       std::vector<float> size = light["size"];
@@ -116,8 +124,10 @@ void Renderer::load_lights(nlohmann::json lights)
 
       auto light = AreaLight(position, intensity, normal, size);
       new_light = std::make_shared<AreaLight>(light);
-      std::unique_ptr<Material> mat = std::make_unique<EmissiveMaterial>(DiffuseMaterial(), light);
-      new_shape = std::make_shared<Sphere>(Vec3{position}, size[0] * 0.1, std::move(mat));
+      std::unique_ptr<Material> mat =
+          std::make_unique<EmissiveMaterial>(DiffuseMaterial(), light);
+      new_shape = std::make_shared<Sphere>(Vec3{position}, size[0] * 0.1,
+                                           std::move(mat));
       scene.shapes.push_back(new_shape);
     }
   }
@@ -140,7 +150,8 @@ void Renderer::load_shapes(nlohmann::json shapes)
         material = load_material(shape["material"]);
       }
 
-      new_shape = std::make_shared<Sphere>(Vec3{center}, radius, std::move(material));
+      new_shape =
+          std::make_shared<Sphere>(Vec3{center}, radius, std::move(material));
     }
     else if (type == "cylinder")
     {
@@ -168,8 +179,8 @@ void Renderer::load_shapes(nlohmann::json shapes)
       {
         material = load_material(shape["material"]);
       }
-      new_shape =
-          std::make_shared<Triangle>(Vec3{v0}, Vec3{v1}, Vec3{v2}, std::move(material));
+      new_shape = std::make_shared<Triangle>(Vec3{v0}, Vec3{v1}, Vec3{v2},
+                                             std::move(material));
     }
 
     if (new_shape != nullptr)
@@ -228,7 +239,8 @@ int Renderer::load_file(const std::string& filename)
   {
     nbounces = parser.get<int>("nbounces");
     int nsamples = parser.get<int>("nsamples");
-    raytracer = std::make_unique<Pathtracer>(&scene, &camera, nbounces, nsamples);
+    raytracer =
+        std::make_unique<Pathtracer>(&scene, &camera, nbounces, nsamples);
   }
   else
   {

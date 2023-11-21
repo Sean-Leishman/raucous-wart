@@ -7,7 +7,6 @@
 
 #include <memory>
 
-
 class Texture
 {
   public:
@@ -45,48 +44,82 @@ class Material
 
   virtual Vec3 emission() const = 0;
   virtual bool scatter(Ray& ray, Intersection& hit_info, Vec3& attenuation,
-               Ray& scattered) const = 0;
+                       Ray& scattered) const = 0;
   virtual bool get_new_ray(Ray&, Intersection&, Vec3&, Ray&) const = 0;
 };
 
-class DiffuseMaterial: public Material{
+class DiffuseMaterial : public Material
+{
   public:
-      DiffuseMaterial(){};
+  DiffuseMaterial(){};
   DiffuseMaterial(const Material& mat);
-  bool scatter(Ray& ray, Intersection& hit_info, Vec3& attenuation, Ray& scattered) const override;
-  Vec3 emission() const override {return {};};
+  bool scatter(Ray& ray, Intersection& hit_info, Vec3& attenuation,
+               Ray& scattered) const override;
+  Vec3 emission() const override { return {}; };
   bool get_new_ray(Ray& ray, Intersection& hit_info, Vec3& attenuation,
                    Ray& scattered) const override;
 };
 
-class ReflectiveMaterial: public Material{
+class ReflectiveMaterial : public Material
+{
+  protected:
+  float roughness;
+  float metallic;
+
+  Vec3 sample_ggx(const Vec3& normal, float roughness) const;
+  float ggxNDF(const Vec3& half_vector, const Vec3& normal) const;
+  Vec3 fresnelSchlick(float cosTheta, const Vec3& F0) const;
+  float geometrySchlickGGX(float NdotV) const;
+
   public:
-      ReflectiveMaterial(){};
-      ReflectiveMaterial(const Material& mat);
-  bool scatter(Ray& ray, Intersection& hit_info, Vec3& attenuation, Ray& scattered) const override;
-  Vec3 emission() const override {return {};};
+  ReflectiveMaterial(){};
+  ReflectiveMaterial(const Material& mat);
+  bool scatter(Ray& ray, Intersection& hit_info, Vec3& attenuation,
+               Ray& scattered) const override;
+  Vec3 emission() const override { return {}; };
   bool get_new_ray(Ray& ray, Intersection& hit_info, Vec3& attenuation,
                    Ray& scattered) const override;
+  Vec3 calculate_color(Vec3&, Vec3&, Ray&) const;
 };
 
-class RefractiveMaterial: public Material{
+class RefractiveMaterial : public Material
+{
   public:
-      RefractiveMaterial(){};
+  RefractiveMaterial(){};
   RefractiveMaterial(const Material& mat);
-  bool scatter(Ray& ray, Intersection& hit_info, Vec3& attenuation, Ray& scattered) const override;
-  Vec3 emission() const override {return {};};
+  bool scatter(Ray& ray, Intersection& hit_info, Vec3& attenuation,
+               Ray& scattered) const override;
+  Vec3 emission() const override { return {}; };
   bool get_new_ray(Ray& ray, Intersection& hit_info, Vec3& attenuation,
                    Ray& scattered) const override;
 };
 
-class EmissiveMaterial: public Material {
+class RRMaterial : public Material
+{
   public:
-      AreaLight light;
-      EmissiveMaterial(){};
-      EmissiveMaterial(const Material&, const AreaLight&);
+  RefractiveMaterial ref_mat;
+  ReflectiveMaterial rel_mat;
 
-      bool scatter(Ray& ray, Intersection& hit_info, Vec3& attenuation, Ray& scattered) const override;
-      Vec3 emission() const override {return light.color.to_vec();};
-      bool get_new_ray(Ray& ray, Intersection& hit_info, Vec3& attenuation,
-                       Ray& scattered) const override;
+  RRMaterial(){};
+  RRMaterial(const Material& mat);
+  bool scatter(Ray& ray, Intersection& hit_info, Vec3& attenuation,
+               Ray& scattered) const override;
+  Vec3 emission() const override { return {}; };
+  bool get_new_ray(Ray& ray, Intersection& hit_info, Vec3& attenuation,
+                   Ray& scattered) const override;
+};
+
+class EmissiveMaterial : public Material
+{
+  public:
+  AreaLight light;
+  EmissiveMaterial(){};
+  EmissiveMaterial(const Material&, const AreaLight&);
+
+  bool scatter(Ray& ray, Intersection& hit_info, Vec3& attenuation,
+               Ray& scattered) const override;
+  Vec3 emission() const override { return light.color.to_vec(); };
+  bool get_new_ray(Ray& ray, Intersection& hit_info, Vec3& attenuation,
+                   Ray& scattered) const override;
+  Vec3 calculate_color(Ray&, Intersection&, Ray&) const;
 };

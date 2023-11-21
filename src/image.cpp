@@ -2,6 +2,7 @@
 
 #include <filesystem>
 #include <fstream>
+#include <string>
 #include <vector>
 
 PPMImage::PPMImage(int width, int height, int max_color_value)
@@ -22,7 +23,13 @@ PPMColor PPMImage::get_pixel(float u, float v) const
   int x = u * width;
   int y = v * height;
 
-  std::cout << "u: " << u << " v: " << v << std::endl;
+  std::cout << "u: " << u << " v: " << v << " x: " << x << " y: " << y << ", "
+            << data.size() << ", " << (y * width + x) << std::endl;
+  if ((y * width) + x > data.size())
+  {
+    return PPMColor();
+  }
+
   return data[(y * width) + x];
 }
 
@@ -43,7 +50,7 @@ bool PPMImage::save_to_file(const std::string& filename)
   // Write pixel data
   for (int y = 0; y < height; ++y)
   {
-    for (int x = width; x > 0;  --x)
+    for (int x = width; x > 0; --x)
     {
       image_file << data[(y * width) + x] << "\n";
     }
@@ -79,7 +86,7 @@ bool PPMImage::read_from_file(const std::string& filename)
   file >> width >> height;
 
   // Read max color value (assuming it's 255)
-  int maxVal;
+  float maxVal;
   file >> maxVal;
 
   // Skip the remaining whitespace
@@ -129,7 +136,7 @@ bool PPMImage::read_from_file(const std::string& filename)
   file.close();
 
   std::filesystem::path path(std::filesystem::current_path());
-  path += "/materials/Martini2.ppm";
+  path += "/materials/" + filename.substr(filename.find(".") - 3);
 
   std::cout << "save file: " << filename << ", to: " << path;
   save_to_file(path);
