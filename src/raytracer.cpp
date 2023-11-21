@@ -23,6 +23,7 @@ PPMColor PhongRaytracer::trace_ray(Ray& ray)
   Intersection hit_info;
   PPMColor final{trace_ray(ray, 0, hit_info)};
   final.clamp();
+ // final = final.gamma_correct();
   return final;
 }
 
@@ -39,7 +40,7 @@ Vec3 PhongRaytracer::trace_ray(Ray& ray, int depth, Intersection& hit_info)
     return scene->bg_color.to_vec();
   }
 
-  if (hit_info.object->material->is_reflective)
+  if (hit_info.object->material->is_reflective && !hit_info.object->material->is_refractive)
   {
     Ray reflect_ray = calculate_reflection_ray(ray, hit_info);
     color = color * (1 - hit_info.object->material->reflectivity) +
@@ -47,7 +48,7 @@ Vec3 PhongRaytracer::trace_ray(Ray& ray, int depth, Intersection& hit_info)
     return color;
   }
 
-  if (hit_info.object->material->is_refractive)
+  if (hit_info.object->material->is_refractive && !hit_info.object->material->is_reflective)
   {
     double refraction_ratio =
         hit_info.first_hit ? hit_info.object->material->refractive_index
@@ -55,6 +56,35 @@ Vec3 PhongRaytracer::trace_ray(Ray& ray, int depth, Intersection& hit_info)
     Ray refract_ray = calculate_refraction_ray(ray, hit_info, refraction_ratio);
     color = color + trace_ray(refract_ray, depth + 1, hit_info);
     return color;
+  }
+
+  if (hit_info.object->material->is_reflective && hit_info.object->material->is_refractive)
+  {
+    Vec3 out_norm = hit_info.normal;
+    Vec3 out_dir;
+    float refraction_ratio = 1 / hit_info.object->material->refractive_index;
+    if (ray.direction.dot(hit_info.normal) < 0)
+    {
+      out_norm  = hit_info.normal * -1;
+      refraction_ratio = hit_info.object->material->refractive_index;
+    }
+
+    double cos_theta = fmin((ray.direction * -1).dot(out_norm), 1.0);
+    double sin_theta = sqrt(1.0 - cos_theta * cos_theta);
+
+    bool cannot_refract = refraction_ratio * sin_theta > 1.0;
+
+    if (!cannot_refract){
+      Ray refract_ray = calculate_refraction_ray(ray, hit_info, refraction_ratio);
+      color = color + trace_ray(refract_ray, depth + 1, hit_info);
+      return color;
+    }
+    else{
+      Ray reflect_ray = calculate_reflection_ray(ray, hit_info);
+      color = color * (1 - hit_info.object->material->reflectivity) +
+              trace_ray(reflect_ray, depth + 1, hit_info);
+      return color;
+    }
   }
 
   Vec3 ambient = hit_info.object->material->diffuse_color.to_vec() *
@@ -122,6 +152,7 @@ Ray PhongRaytracer::calculate_refraction_ray(Ray& ray, Intersection& hit_info,
   Vec3 dir;
   if (!is_front_face)
   {
+    // Intersecting with inside of obejct so take that normal
     dir = Vec3::refract(unit_dir, hit_info.normal * -1, ir);
   }
   else
@@ -153,6 +184,7 @@ PPMColor Pathtracer::trace_ray(Ray& ray)
   final_color = final_color / n_samples;
   PPMColor color{final_color};
   color.clamp();
+  // color.gamma_correct();
   return color;
 }
 

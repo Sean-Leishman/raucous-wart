@@ -1,4 +1,4 @@
-# Install script for directory: /home/seanleishman/university/raucous_wart
+# Install script for directory: /home/seanleishman/University/cg/cw2
 
 # Set the install prefix
 if(NOT DEFINED CMAKE_INSTALL_PREFIX)
@@ -44,7 +44,7 @@ endif()
 
 if(NOT CMAKE_INSTALL_LOCAL_ONLY)
   # Include the install script for each subdirectory.
-  include("/home/seanleishman/university/raucous_wart/cmake-build-release/src/cmake_install.cmake")
+  include("/home/seanleishman/University/cg/cw2/cmake-build-release/src/cmake_install.cmake")
 
 endif()
 
@@ -56,5 +56,5 @@ endif()
 
 string(REPLACE ";" "\n" CMAKE_INSTALL_MANIFEST_CONTENT
        "${CMAKE_INSTALL_MANIFEST_FILES}")
-file(WRITE "/home/seanleishman/university/raucous_wart/cmake-build-release/${CMAKE_INSTALL_MANIFEST}"
+file(WRITE "/home/seanleishman/University/cg/cw2/cmake-build-release/${CMAKE_INSTALL_MANIFEST}"
      "${CMAKE_INSTALL_MANIFEST_CONTENT}")

@@ -72,14 +72,14 @@ class ReflectiveMaterial : public Material
   float geometrySchlickGGX(float NdotV) const;
 
   public:
-  ReflectiveMaterial(){};
+  ReflectiveMaterial(): roughness(0.4f), metallic(0.1f){};
   ReflectiveMaterial(const Material& mat);
   bool scatter(Ray& ray, Intersection& hit_info, Vec3& attenuation,
                Ray& scattered) const override;
   Vec3 emission() const override { return {}; };
   bool get_new_ray(Ray& ray, Intersection& hit_info, Vec3& attenuation,
                    Ray& scattered) const override;
-  Vec3 calculate_color(Vec3&, Vec3&, Ray&) const;
+  Vec3 calculate_color(Vec3&, Vec3&, Vec3&) const;
 };
 
 class RefractiveMaterial : public Material

@@ -1,7 +1,13 @@
-C:\WINDOWS\system32\wsl.exe --distribution Ubuntu --exec /bin/bash -c "export CMAKE_COLOR_DIAGNOSTICS=ON && export CLION_IDE=TRUE && export JETBRAINS_IDE=TRUE && cd /home/seanleishman/university/raucous_wart/cmake-build-release && /usr/bin/cmake -DCMAKE_BUILD_TYPE=Release -G 'CodeBlocks - Unix Makefiles' -S /home/seanleishman/university/raucous_wart -B /home/seanleishman/university/raucous_wart/cmake-build-release"
-PROJECT_SOURCE_DIR="/home/seanleishman/university/raucous_wart"
-CMAKE_MODULE_PATH="/home/seanleishman/university/raucous_wart/cmake"
-SOURCES="/home/seanleishman/university/raucous_wart/src/bvh.cpp/home/seanleishman/university/raucous_wart/src/camera.cpp/home/seanleishman/university/raucous_wart/src/image.cpp/home/seanleishman/university/raucous_wart/src/input.cpp/home/seanleishman/university/raucous_wart/src/light.cpp/home/seanleishman/university/raucous_wart/src/material.cpp/home/seanleishman/university/raucous_wart/src/ray.cpp/home/seanleishman/university/raucous_wart/src/raytracer.cpp/home/seanleishman/university/raucous_wart/src/renderer.cpp/home/seanleishman/university/raucous_wart/src/scene.cpp/home/seanleishman/university/raucous_wart/src/shape.cpp/home/seanleishman/university/raucous_wart/src/vector.cpp"
--- Configuring done
--- Generating done
--- Build files have been written to: /home/seanleishman/university/raucous_wart/cmake-build-release
+/home/seanleishman/.local/share/JetBrains/Toolbox/apps/clion/bin/cmake/linux/x64/bin/cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_MAKE_PROGRAM=/home/seanleishman/.local/share/JetBrains/Toolbox/apps/clion/bin/ninja/linux/x64/ninja -DCMAKE_BUILD_TYPE=Release -G Ninja -S /home/seanleishman/University/cg/cw2 -B /home/seanleishman/University/cg/cw2/cmake-build-release
+-- The CXX compiler identification is GNU 11.4.0
+-- Detecting CXX compiler ABI info
+-- Detecting CXX compiler ABI info - done
+-- Check for working CXX compiler: /usr/bin/c++ - skipped
+-- Detecting CXX compile features
+-- Detecting CXX compile features - done
+PROJECT_SOURCE_DIR="/home/seanleishman/University/cg/cw2"
+CMAKE_MODULE_PATH="/home/seanleishman/University/cg/cw2/cmake"
+SOURCES="/home/seanleishman/University/cg/cw2/src/bvh.cpp/home/seanleishman/University/cg/cw2/src/camera.cpp/home/seanleishman/University/cg/cw2/src/image.cpp/home/seanleishman/University/cg/cw2/src/input.cpp/home/seanleishman/University/cg/cw2/src/light.cpp/home/seanleishman/University/cg/cw2/src/material.cpp/home/seanleishman/University/cg/cw2/src/ray.cpp/home/seanleishman/University/cg/cw2/src/raytracer.cpp/home/seanleishman/University/cg/cw2/src/renderer.cpp/home/seanleishman/University/cg/cw2/src/scene.cpp/home/seanleishman/University/cg/cw2/src/shape.cpp/home/seanleishman/University/cg/cw2/src/vector.cpp"
+-- Configuring done (0.1s)
+-- Generating done (0.0s)
+-- Build files have been written to: /home/seanleishman/University/cg/cw2/cmake-build-release

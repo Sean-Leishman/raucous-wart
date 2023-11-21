@@ -1,6 +1,6 @@
-/home/seanleishman/university/raucous_wart/cmake-build-release/CMakeFiles/main.dir
-/home/seanleishman/university/raucous_wart/cmake-build-release/CMakeFiles/edit_cache.dir
-/home/seanleishman/university/raucous_wart/cmake-build-release/CMakeFiles/rebuild_cache.dir
-/home/seanleishman/university/raucous_wart/cmake-build-release/src/CMakeFiles/raytracer_lib.dir
-/home/seanleishman/university/raucous_wart/cmake-build-release/src/CMakeFiles/edit_cache.dir
-/home/seanleishman/university/raucous_wart/cmake-build-release/src/CMakeFiles/rebuild_cache.dir
+/home/seanleishman/University/cg/cw2/cmake-build-release/CMakeFiles/main.dir
+/home/seanleishman/University/cg/cw2/cmake-build-release/CMakeFiles/edit_cache.dir
+/home/seanleishman/University/cg/cw2/cmake-build-release/CMakeFiles/rebuild_cache.dir
+/home/seanleishman/University/cg/cw2/cmake-build-release/src/CMakeFiles/raytracer_lib.dir
+/home/seanleishman/University/cg/cw2/cmake-build-release/src/CMakeFiles/edit_cache.dir
+/home/seanleishman/University/cg/cw2/cmake-build-release/src/CMakeFiles/rebuild_cache.dir

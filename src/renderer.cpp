@@ -60,7 +60,7 @@ std::unique_ptr<Material> Renderer::load_material(nlohmann::json j)
   }
 
   std::unique_ptr<Material> material;
-  if (is_reflective && is_reflective)
+  if (is_reflective && is_refractive)
   {
     material = std::make_unique<RRMaterial>();
   }

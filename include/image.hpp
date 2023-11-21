@@ -34,7 +34,7 @@ class PPMColor
     return out;
   }
 
-  PPMColor operator*(float value) const
+  const PPMColor operator*(const float& value) const
   {
     return PPMColor(r * value, g * value, b * value);
   }
@@ -54,13 +54,41 @@ class PPMColor
     return PPMColor(r + color.r, g + color.g, b + color.b);
   }
 
+  PPMColor operator+(const Vec3& color) const
+  {
+    return PPMColor(r + color.x, g + color.y, b + color.z);
+  }
+
+
+  PPMColor operator/(const Vec3& color) const
+  {
+    return PPMColor(r / color.x, g / color.y, b / color.z);
+  }
+
+  PPMColor operator/(const float& s) const
+  {
+    return PPMColor(r / s, g / s, b / s);
+  }
+
+
   Vec3 to_vec() const { return Vec3(r, g, b); }
 
   void clamp()
-  {
+  {/*
     r = std::min(1.0f, r);
     g = std::min(1.0f, g);
     b = std::min(1.0f, b);
+    */
+    PPMColor den = PPMColor{r/(r+1.0f), g/(g+1.0f), b/(b+1.0f)};
+    // Scale for displayable range
+    r = den.r;
+    g = den.g;
+    b = den.b;
+  }
+
+  PPMColor gamma_correct(){
+    float gamma = 1.0f / 2.2f;
+    return PPMColor{static_cast<float>(pow(r, gamma)), static_cast<float>(pow(g, gamma)), static_cast<float>(pow(b, gamma))};
   }
 };
 

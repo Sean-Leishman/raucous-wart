@@ -47,7 +47,7 @@ bool DiffuseMaterial::get_new_ray(Ray& ray, Intersection& hit_info,
 }
 
 ReflectiveMaterial::ReflectiveMaterial(const Material& mat)
-    : Material(mat), roughness(1.0f), metallic(1.0f)
+    : Material(mat), roughness(0.2f), metallic(1.0f)
 {
 }
 
@@ -57,16 +57,15 @@ Vec3 ReflectiveMaterial::sample_ggx(const Vec3& normal, float roughness) const
 
   float alpha = roughness * roughness;
   float phi = 2.0 * M_PI * rand.x;
-  float cos_theta = sqrt((1 - rand.y) / (1.0 + (alpha * alpha - 1.0) * rand.y));
-  float sin_theta = sqrt(1.0 - cos_theta * cos_theta);
+  float theta = atan(alpha * sqrt(rand.y) / sqrt(1.0 - rand.y));
 
   Vec3 h;
-  h.x = cos(phi) * sin_theta;
-  h.y = sin(phi) * sin_theta;
-  h.z = cos_theta;
+  h.x = cos(phi) * sin(theta);
+  h.y = sin(phi) * sin(theta);
+  h.z = cos(theta);
 
   Vec3 up =
-      fabs(normal.z) > 0.99 ? Vec3(0.0f, 0.0f, 1.0f) : Vec3(1.0f, 0.0f, 0.0f);
+      fabs(normal.z) < 0.99 ? Vec3(0.0f, 0.0f, 1.0f) : Vec3(1.0f, 0.0f, 0.0f);
   Vec3 tangent = Vec3::normalize(up.cross(normal));
   Vec3 bitangent = normal.cross(tangent);
 
@@ -76,15 +75,14 @@ Vec3 ReflectiveMaterial::sample_ggx(const Vec3& normal, float roughness) const
 bool ReflectiveMaterial::scatter(Ray& ray, Intersection& hit_info,
                                  Vec3& attenuation, Ray& scattered) const
 {
-  Vec3 microfacet_normal = sample_ggx(hit_info.normal, reflectivity);
-  Vec3 scatter_dir = Vec3::reflect(ray.direction, microfacet_normal);
+  Vec3 unit_dir = Vec3::normalize(ray.direction) * -1;
+  Vec3 microfacet_normal = sample_ggx(unit_dir, roughness);
+
+  Vec3 scatter_dir = Vec3::reflect(unit_dir * -1, hit_info.normal);
   scattered = {hit_info.position + scatter_dir * 0.0001f, scatter_dir};
-
-  attenuation = calculate_color(ray.direction, microfacet_normal, scattered);
-  std::cout << "scatter reflecton:" << hit_info.normal << ", "
-            << microfacet_normal << ", " << scatter_dir << ", " << attenuation
-            << std::endl;
-
+  Vec3 view_dir = ray.direction * -1;
+  attenuation = calculate_color(view_dir, hit_info.normal, scatter_dir);
+  // attenuation = Vec3{1.0f, 1.0f, 1.0f};
   return true;
 }
 
@@ -112,10 +110,10 @@ float ReflectiveMaterial::geometrySchlickGGX(float NdotV) const
 }
 
 Vec3 ReflectiveMaterial::calculate_color(Vec3& view_dir, Vec3& normal,
-                                         Ray& scattered) const
+                                         Vec3& scattered) const
 {
-  Vec3 albedo = specular_color.to_vec();
-  Vec3 light_dir = Vec3::normalize(scattered.direction);
+  Vec3 albedo = diffuse_color.to_vec();
+  Vec3 light_dir = Vec3::normalize(scattered);
 
   float ir = 1 / refractive_index;
   if (view_dir.dot(normal) < 0)
@@ -126,13 +124,11 @@ Vec3 ReflectiveMaterial::calculate_color(Vec3& view_dir, Vec3& normal,
   Vec3 half_vector = Vec3::normalize(view_dir + light_dir);
   float NdotV = std::max(normal.dot(view_dir), 0.0f);
   float NdotL = std::max(normal.dot(light_dir), 0.0f);
-  float NdotH = std::max(normal.dot(half_vector), 0.0f);
   float HdotV = std::max(half_vector.dot(view_dir), 0.0f);
 
-  float r0 = (1 - ir) / (1 + ir);
+  float r0 = 0.4;
   Vec3 F0 = Vec3{r0, r0, r0};
-  F0 = F0 * F0;
-  F0 = Vec3::mix(F0, albedo, metallic);
+ // F0 = Vec3::mix(F0, albedo, metallic);
   Vec3 F = fresnelSchlick(HdotV, F0);
 
   float D = ggxNDF(half_vector, normal);
@@ -147,10 +143,9 @@ Vec3 ReflectiveMaterial::calculate_color(Vec3& view_dir, Vec3& normal,
   // Combine specular and diffuse components
   Vec3 kS = F;
   Vec3 kD = Vec3(1.0f, 1.0f, 1.0f) - kS;
-  kD = kD * (metallic * -1 + 1);
 
   Vec3 diffuse = kD * albedo / M_PI;
-  return (diffuse + specular) * NdotL;
+  return (diffuse + specular) ;//* NdotL;
 }
 
 bool ReflectiveMaterial::get_new_ray(Ray& ray, Intersection& hit_info,
