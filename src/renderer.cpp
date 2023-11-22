@@ -19,8 +19,7 @@ void Renderer::render_frame()
   {
     for (int y = 0; y < image_height; ++y)
     {
-      Ray ray = camera.compute_ray((float)x, (float)y);
-      PPMColor color = raytracer->trace_ray(ray);
+      PPMColor color = raytracer->trace_ray((float) x, (float) y);
       image.set_pixel(x, y, color);
     }
     std::cout << "scan line: " << x << std::endl;
@@ -241,6 +240,7 @@ int Renderer::load_file(const std::string& filename)
     int nsamples = parser.get<int>("nsamples");
     raytracer =
         std::make_unique<Pathtracer>(&scene, &camera, nbounces, nsamples);
+    camera.defocus = true;
   }
   else
   {

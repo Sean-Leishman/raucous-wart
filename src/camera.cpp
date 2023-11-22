@@ -27,13 +27,15 @@ PRenderHole::PRenderHole()
   focus_dist = 10;
   defocus_u = Vec3();
   defocus_v = Vec3();
+
+  defocus = false;
 };
 
 PRenderHole::PRenderHole(int width, int height, Vec3 position, Vec3 lookAt,
                          Vec3 upVector, float fov, float exposure)
     : width(width), height(height), position(position), lookAt(lookAt),
-      upVector(upVector), fov(fov), exposure(exposure), defocus_angle(-0.1), focus_dist(10),
-      defocus_u(Vec3()), defocus_v(Vec3())
+      upVector(upVector), fov(fov), exposure(exposure), defocus_angle(0.3), focus_dist(20),
+      defocus_u(Vec3()), defocus_v(Vec3()), defocus(false)
 {
   forward = Vec3::normalize(position - lookAt);
   right = Vec3::normalize(upVector.cross(forward));
@@ -59,6 +61,10 @@ PRenderHole::PRenderHole(int width, int height, Vec3 position, Vec3 lookAt,
   defocus_u = right * defocus_radius;
   defocus_v = up * defocus_radius;
 
+  if (!defocus){
+    defocus_angle = -0.1;
+  }
+
 };
 
 Ray PRenderHole::compute_ray(float s, float t)
@@ -71,7 +77,10 @@ Ray PRenderHole::compute_ray(float s, float t)
    */
 
   auto pixel_center = pixel100_loc + (pixel_delta_u * s) + (pixel_delta_v * t);
-  auto pixel_sample = pixel_center; //+ pixel_sample_square();
+  auto pixel_sample = pixel_center + pixel_sample_square();
+  if (!defocus){
+    pixel_sample = pixel_center;
+  }
 
   auto ray_origin = (defocus_angle <= 0) ? position : defocus_disk_sample();
   auto ray_direction = pixel_sample - ray_origin;

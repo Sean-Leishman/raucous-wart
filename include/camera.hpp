@@ -44,9 +44,13 @@ class PRenderHole : public Camera
 
   Vec3 pixel100_loc;
 
+
   public:
-  PRenderHole();
+      bool defocus;
+
+      PRenderHole();
   PRenderHole(int, int, Vec3, Vec3, Vec3, float, float);
+
 
   Ray compute_ray(float, float);
 

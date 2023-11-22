@@ -4,8 +4,9 @@
 #include "renderer.hpp"
 #include "scene.hpp"
 
-PPMColor BinaryRaytracer::trace_ray(Ray& ray)
+PPMColor BinaryRaytracer::trace_ray(float x, float y)
 {
+  Ray ray = camera->compute_ray(x, y);
   Intersection hit_info;
   PPMColor color;
 
@@ -18,8 +19,9 @@ PPMColor BinaryRaytracer::trace_ray(Ray& ray)
   return color;
 }
 
-PPMColor PhongRaytracer::trace_ray(Ray& ray)
+PPMColor PhongRaytracer::trace_ray(float x, float y)
 {
+  Ray ray = camera->compute_ray(x, y);
   Intersection hit_info;
   PPMColor final{trace_ray(ray, 0, hit_info)};
   final.clamp();
@@ -172,12 +174,13 @@ Ray PhongRaytracer::calculate_reflection_ray(Ray& ray, Intersection& hit_info)
   return Ray(hit_info.position + unit_dir * 0.000001f, unit_dir);
 }
 
-PPMColor Pathtracer::trace_ray(Ray& ray)
+PPMColor Pathtracer::trace_ray(float x, float y)
 {
   Vec3 final_color;
 #pragma omp parallel for
   for (int i = 0; i < n_samples; i++)
   {
+    Ray ray = camera->compute_ray(x, y);
     Vec3 color{trace_ray(ray, 0)};
     final_color = final_color + color;
   }

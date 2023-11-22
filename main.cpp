@@ -24,7 +24,7 @@ int debug()
 
 int main()
 {
-  std::string filename("/materials/pathtracer2.json");
+  std::string filename("/materials/mirror_test.json");
   Renderer renderer;
   renderer.load_file(filename);
   renderer.render_frame();
