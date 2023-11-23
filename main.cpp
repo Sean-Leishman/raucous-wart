@@ -22,12 +22,12 @@ int debug()
   return 0;
 }
 
-int main()
+int main(int argc, char* argv[])
 {
-  std::string filename("/materials/mirror_test.json");
+  std::string filename(argv[1]);
   Renderer renderer;
   renderer.load_file(filename);
-  renderer.render_frame();
+  renderer.render_frame(std::string{argv[2]});
 
   return 0;
 }

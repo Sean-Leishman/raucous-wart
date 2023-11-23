@@ -10,7 +10,7 @@
 #include <filesystem>
 #include <memory>
 
-void Renderer::render_frame()
+void Renderer::render_frame(std::string save_file)
 {
   scene.build_bvh();
 
@@ -27,7 +27,8 @@ void Renderer::render_frame()
   std::cout << scene.shapes[0] << "\n";
 
   std::filesystem::path path(std::filesystem::current_path());
-  path += "/materials/2.ppm";
+  // path += "/materials/2.ppm";
+  path += save_file;
   image.save_to_file(path);
 }
 
@@ -86,6 +87,8 @@ std::unique_ptr<Material> Renderer::load_material(nlohmann::json j)
   material->texture = std::move(texture);
   material->is_reflective = is_reflective;
   material->is_refractive = is_refractive;
+
+
   return std::move(material);
 }
 

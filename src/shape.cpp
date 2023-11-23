@@ -83,12 +83,16 @@ Cylinder::Cylinder(Vec3 center, Vec3 axis, float radius, float height,
     : Shape(std::move(material)), center(center), axis(axis), radius(radius),
       height(height)
 {
-  bbox = {Vec3{static_cast<float>(center.x - radius),
-               static_cast<float>(center.y - height),
-               static_cast<float>(center.z - radius)},
-          Vec3{static_cast<float>(center.x + radius),
-               static_cast<float>(center.y + height),
-               static_cast<float>(center.z + radius)}};
+  Quaternion rotation = rotation_from_to( Vec3(0.0f, 1.0f, 0.0f), axis);
+  Vec3 min = Vec3{static_cast<float>(center.x - radius),
+                  static_cast<float>(center.y - height),
+                  static_cast<float>(center.z - radius)};
+  Vec3 max = Vec3{static_cast<float>(center.x + radius),
+                   static_cast<float>(center.y + height),
+                   static_cast<float>(center.z + radius)};
+  min = rotate_vector(min, rotation);
+  max = rotate_vector(max, rotation);
+  bbox = {min, max};
 };
 // Add for rotated cylinders
 
@@ -197,13 +201,14 @@ bool Cylinder::intersect(const Ray& ray, float tmin, float tmax,
 
 Vec2 Cylinder::interpolate_uv(const Intersection* hit_info) const
 {
+  Quaternion rotation = rotation_from_to(axis, Vec3(0.0f, 1.0f, 0.0f));
   Vec3 point = hit_info->position;
+  point = rotate_vector(point, rotation);
   point = point - center;
   point = point * -1;
 
   float theta = atan2(point.z, point.x);
   float u = theta / (2 * M_PI) + 0.5f;
-  float min_height = center.y - height;
   float v = 0.5f + point.y / (2 * height);
 
   return {u, v};
@@ -269,7 +274,6 @@ bool Triangle::intersect(const Ray& ray, float tmin, float tmax,
   return false;
 }
 
-// TODO: Pick plane to project too based on differences in angle
 Vec2 Triangle::get_uv(const Vec3& point) const
 {
 
@@ -280,8 +284,23 @@ Vec2 Triangle::get_uv(const Vec3& point) const
   float min_z = std::min({v0.z, v1.z, v2.z});
   float max_z = std::max({v0.z, v1.z, v2.z});
 
-  float u = (point.x - min_x) / (max_x - min_x);
-  float v = (point.z - min_z) / (max_z - min_z);
+  float den1 = max_x - min_x;
+  float den2 = max_z - max_z;
+
+  float num1 = point.x - min_x;
+  float num2 = point.z - min_z;
+
+  if (den1 == 0) {
+    den1 = max_y - min_y;
+    num1 = point.y - min_y;
+  }
+  else if (den2 == 0) {
+    den2 = max_y - min_y;
+    num1 = point.y - min_y;
+  };
+
+  float u = num1 / den1;
+  float v = num2 / den2;
 
   return {u, v};
 }

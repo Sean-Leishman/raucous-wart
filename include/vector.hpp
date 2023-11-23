@@ -132,6 +132,16 @@ class Vec3
     return Vec3(random_double(min, max), random_double(min, max),
                 random_double(min, max));
   }
+
+  Vec3 clamp() const
+  {
+    return Vec3{std::min(std::max(0.0, x), 1.0), std::min(std::max(0.0, y), 1.0), std::min(std::max(0.0, z), 1.0)};
+  };
+
+  Vec3 clamp(double min, double max) const
+  {
+    return Vec3{std::max(min, std::min(max, x)), std::max(min, std::min(max, y)), std::max(min, std::min(max, z))};
+  };
 };
 
 class Mat3

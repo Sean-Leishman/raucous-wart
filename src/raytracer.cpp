@@ -25,7 +25,7 @@ PPMColor PhongRaytracer::trace_ray(float x, float y)
   Intersection hit_info;
   PPMColor final{trace_ray(ray, 0, hit_info)};
   final.clamp();
- // final = final.gamma_correct();
+  final = final.gamma_correct();
   return final;
 }
 
@@ -187,7 +187,7 @@ PPMColor Pathtracer::trace_ray(float x, float y)
   final_color = final_color / n_samples;
   PPMColor color{final_color};
   color.clamp();
-  // color.gamma_correct();
+ // color = color.gamma_correct();
   return color;
 }
 
@@ -206,7 +206,11 @@ Vec3 Pathtracer::trace_ray(Ray& ray, int depth)
   if (hit_info.object->material->scatter(ray, hit_info, attenuation, scattered))
   {
     Vec3 indirect_light = trace_ray(scattered, depth + 1);
-    return attenuation * indirect_light;
+    Vec3 color = attenuation * indirect_light;
+    PPMColor c = PPMColor{color};
+    // c.clamp();
+
+    return c.to_vec();
   }
 
   return attenuation;

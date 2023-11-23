@@ -42,5 +42,5 @@ class Renderer
   Renderer();
   int load_file(const std::string&);
 
-  void render_frame();
+  void render_frame(std::string save_file);
 };
