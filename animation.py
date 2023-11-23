@@ -4,6 +4,7 @@ import cv2
 import json
 import math
 import subprocess
+import copy
 
 NUM_SPHERES = 10
 BACKGROUND_COLOR = [0.25, 0.25, 0.25]
@@ -31,14 +32,21 @@ def load_shapes(index, positions, frames):
                     "refractiveindex": 1.5
             }
         }
+
+        if i % 2 == 0:
+            sphere['material']['isreflective'] = True
+        else:
+            if i % 3 == 0:
+                sphere['material']['isreflective'] = True
+
         shapes.append(sphere)
 
-    triangles = [
+    floor = [
         {
             "type": "triangle",
-            "v0": [-5, -2, 5],
-            "v1": [5, -2, 5],
-            "v2": [5, -2, 0],
+            "v0": [-10, -2, 10],
+            "v1": [10, -2, 10],
+            "v2": [10, -2, -12],
             "material":
             {
                 "ks": 0.1,
@@ -54,9 +62,9 @@ def load_shapes(index, positions, frames):
         },
         {
             "type": "triangle",
-            "v0": [-5, -2, 0],
-            "v1": [-5, -2, 5],
-            "v2": [5, -2, 0],
+            "v0": [-10, -2, -12],
+            "v1": [-10, -2, 10],
+            "v2": [10, -2, -12],
             "material":
             {
                 "ks": 0.1,
@@ -71,7 +79,79 @@ def load_shapes(index, positions, frames):
             }
         }
     ]
-    shapes.extend(triangles)
+
+    wall1 = [
+        {
+            "type": "triangle",
+            "v0": [-10, -2, -12],
+            "v1": [10, -2, -12],
+            "v2": [10, 6, -12],
+            "material":
+            {
+                "ks": 0.1,
+                "kd": 0.9,
+                "specularexponent": 20,
+                "diffusecolor": [0.5, 0.8, 0.5],
+                "specularcolor": [1.0, 1.0, 1.0],
+                "isreflective": False,
+                "reflectivity": 1.0,
+                "isrefractive": False,
+                "refractiveindex": 1.0
+            }
+        },
+        {
+            "type": "triangle",
+            "v0": [-10, -2, -12],
+            "v1": [-10, 6, -12],
+            "v2": [10, 6, -12],
+            "material":
+            {
+                "ks": 0.1,
+                "kd": 0.9,
+                "specularexponent": 20,
+                "diffusecolor": [0.5, 0.8, 0.5],
+                "specularcolor": [1.0, 1.0, 1.0],
+                "isreflective": False,
+                "reflectivity": 1.0,
+                "isrefractive": False,
+                "refractiveindex": 1.0
+            }
+        }
+    ]
+
+    wall2 = copy.deepcopy(wall1)
+    wall3 = copy.deepcopy(wall2)
+    wall4 = copy.deepcopy(wall3)
+
+    wall2[0]['v0'] = [-10, -2, -12]
+    wall2[0]['v1'] = [-10, -2, 10]
+    wall2[0]['v2'] = [-10, 6, -12]
+
+    wall2[1]['v0'] = [-10, -2, 10]
+    wall2[1]['v1'] = [-10, 6, 10]
+    wall2[1]['v2'] = [-10, 6, -12]
+
+    wall3[0]['v0'] = [-10, 6, 10]
+    wall3[0]['v1'] = [-10, -2, 10]
+    wall3[0]['v2'] = [10, 6, 10]
+
+    wall3[1]['v0'] = [-10, -2, 10]
+    wall3[1]['v1'] = [10, 6, 10]
+    wall3[1]['v2'] = [10, -2, 10]
+
+    wall4[0]['v0'] = [10, 6, 10]
+    wall4[0]['v1'] = [10, -2, 10]
+    wall4[0]['v2'] = [10, 6, -12]
+
+    wall4[1]['v0'] = [10, -2, 10]
+    wall4[1]['v1'] = [10, 6, -12]
+    wall4[1]['v2'] = [10, -2, -12]
+
+    shapes.extend(floor)
+    shapes.extend(wall1)
+    shapes.extend(wall2)
+    shapes.extend(wall3)
+    shapes.extend(wall4)
     return shapes
 
 
@@ -169,8 +249,8 @@ light_index = [0, 50]
 for frame in range(num_frames):
     curr_frame = {}
     curr_frame['nbounces'] = 6
-    curr_frame['samples'] = 5000
-    curr_frame['rendermode'] = 'phong'
+    curr_frame['nsamples'] = 5000
+    curr_frame['rendermode'] = 'pathtracer'
     position, look_at = camera_position(5, frame, 100)
     curr_frame['camera'] = load_camera(frame, position, look_at)
 

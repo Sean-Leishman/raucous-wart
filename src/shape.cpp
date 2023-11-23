@@ -280,6 +280,9 @@ bool Triangle::intersect(const Ray& ray, float tmin, float tmax,
     intersection->position = ray.point_at_parameter(t);
     intersection->distance = t;
     intersection->normal = Vec3::normalize(edge1.cross(edge2));
+    if (intersection->normal.dot(ray.direction) > 0) {
+      intersection->normal = intersection->normal * -1;
+    }
     intersection->object = get_shared_ptr();
     return true;
   }

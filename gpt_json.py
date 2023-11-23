@@ -17,12 +17,18 @@ features = {
     'Basic Raytracer:5': 0,
     'Basic Raytracer:6': 0,
     'Basic Raytracer:7': 0,
+    'Basic Raytracer:8': 0,
+    'Basic Raytracer:9': 0,
+    'Basic Raytracer:10': 0,
     'Intermediate Raytracer:1': 0,
     'Intermediate Raytracer:2': 0,
+    'Intermediate Raytracer:7': 0,
+    'Intermediate Raytracer:11': 0,
     'Pathtracer:1': 0,
     'Pathtracer:2': 0,
     'Pathtracer:3': 0,
     'Pathtracer:4': 0,
+    'Pathtracer:5': 0,
 }
 
 CONTINUE = True
@@ -32,14 +38,16 @@ if __name__ == "__main__":
     result = []
 
     if CONTINUE:
-        with open('llm_responses2.json') as f:
+        with open('llm_responses3.json') as f:
             result = json.load(f)
 
         for row in result:
             features[row['feature']] += 1
 
-    last_query = result[-1]['query']
-    found = False
+        last_query = result[-1]['query']
+        found = False
+    else:
+        found = True
 
     i = 0
     for conv_idx in range(len(data)):
@@ -120,7 +128,7 @@ if __name__ == "__main__":
                 if len(message['content']['parts']) > 1:
                     print("ERROR: Number of answe parts exceeds expected")
 
-                with open("llm_responses2.json", "w") as f:
+                with open("llm_responses4.json", "w") as f:
                     json.dump(result, f)
-    with open("llm_responses.json", "w") as f:
+    with open("llm_responses3.json", "w") as f:
         json.dump(result, f)
