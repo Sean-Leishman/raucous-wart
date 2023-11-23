@@ -27,6 +27,43 @@ def load_shapes(index, positions, frames):
                 }
         }
         shapes.append(sphere)
+
+    shapes.append({
+        "type":"triangle",
+        "v0": [ -1, -0.5, 2],
+        "v1": [ 1, -0.5, 2],
+        "v2": [ 1, -0.5, 0],
+        "material":
+        {
+          "ks":0.1,
+          "kd":0.9,
+          "specularexponent":20,
+          "diffusecolor":[0.5, 0.8, 0.5],
+          "specularcolor":[1.0,1.0,1.0],
+          "isreflective":False,
+          "reflectivity":1.0,
+          "isrefractive":False,
+          "refractiveindex":1.0
+        }
+      })
+    shapes.append({
+        "type":"triangle",
+        "v0": [-1, -0.5, 0],
+        "v1": [-1, -0.5, 2],
+        "v2": [ 1, -0.5, 0],
+        "material":
+        {
+          "ks":0.1,
+          "kd":0.9,
+          "specularexponent":20,
+          "diffusecolor":[0.5, 0.8, 0.5],
+          "specularcolor":[1.0,1.0,1.0],
+          "isreflective":False,
+          "reflectivity":1.0,
+          "isrefractive":False,
+          "refractiveindex":1.0
+        }
+      })
     return shapes
 
 def load_camera(index, positions, rotations):
@@ -36,7 +73,7 @@ def load_camera(index, positions, rotations):
         "height":800,
         "position":positions,
         "lookAt":rotations,
-        "upVector": [0, 0, 1],
+        "upVector": [0, 1, 0],
         "fov":45.0,
         "exposure":0.1
     }
@@ -48,18 +85,22 @@ def load_light():
         light_positions[light_index[1]]
     ]
 
-    positions[0][1] += 5
-    positions[1][1] -= 5
+    positions[0][1] += 0.1
+    positions[1][1] -= 0.1
 
     lights = [
         {
             "type": "arealight",
             "position": positions[0],
+            "size": [2, 4, 0],
+            "normal": [0,0,0],
             "intensity": [30, 30, 30]
         },
         {
             "type": "arealight",
             "position": positions[1],
+            "size": [2, 4, 0],
+            "normal": [0,0,0],
             "intensity": [30,30,30]
         },
     ]
@@ -81,7 +122,7 @@ def generate_positions(num_frames, a, initial_height):
     for frame in range(num_frames):
         t = -math.pi + 2 * math.pi * frame / num_frames
         x, y, z = lemniscate_position(a, t)
-        positions.append((x, y, z))
+        positions.append((x/5, z/5, y/5))
     return positions
 
 
@@ -115,12 +156,12 @@ for frame in range(num_frames):
     curr_frame = {}
     curr_frame['nbounces'] = 6
     curr_frame['samples'] = 5000
-    curr_frame['phong'] = 'pathtracer'
-    position, look_at = camera_position(5, frame, 100)
+    curr_frame['rendermode'] = 'phong'
+    position, look_at = camera_position(2, frame, 100)
     curr_frame['camera'] = load_camera(frame, position, look_at)
 
     curr_frame['scene'] = {}
-    curr_frame['scene']['background_color'] = BACKGROUND_COLOR
+    curr_frame['scene']['backgroundcolor'] = BACKGROUND_COLOR
     curr_frame['scene']['lightsources'] = load_light()
 
     curr_frame['scene']['shapes'] = load_shapes(frame, positions, figure_8)
@@ -129,7 +170,11 @@ for frame in range(num_frames):
     with open(filename, "w") as f:
         json.dump(curr_frame, f)
 
-    out = f'./materials/Animation/Images/frame_{frame}.json'
-    result = subprocess.run(["/cmake-build-release/main", filename, out])
+
+for frame in range(num_frames):
+    filename = f'./materials/Animation/Scene/frame_{frame}.json'
+    out = f'./materials/Animation/Images/frame_{frame}.ppm'
+    print(filename, out)
+    result = subprocess.run(["./cmake-build-release/main", filename[1:], out[1:]])
 
 
