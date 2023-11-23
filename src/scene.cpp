@@ -15,6 +15,16 @@ Scene::Scene()
   shapes = std::vector<std::shared_ptr<Shape>>();
 }
 
+void Scene::apply_transform(Mat4& view_matrix){
+  for (auto& object: shapes) {
+    object->transform(view_matrix);
+  }
+
+  for (auto& object: lights) {
+    object->transform(view_matrix);
+  }
+}
+
 void Scene::build_bvh(){
   bvh_tree.buildBVH(shapes);
 }

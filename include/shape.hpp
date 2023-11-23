@@ -81,6 +81,8 @@ class Shape : public std::enable_shared_from_this<Shape>
   virtual Vec2 interpolate_uv(const Intersection* hit_info) const = 0;
   virtual std::string name() const = 0;
   friend std::ostream& operator<<(std::ostream& os, const Shape& shape);
+
+  virtual void transform(Mat4& view_matrix) = 0;
 };
 
 class Sphere : public Shape
@@ -99,6 +101,7 @@ class Sphere : public Shape
   Vec2 interpolate_uv(const Intersection* hit_info) const override;
   bool intersect(const Ray&, float, float, Intersection*) const override;
   std::string name() const override {return "Sphere";};
+  void transform(Mat4& view_matrix) override;
 };
 
 class Cylinder : public Shape
@@ -122,6 +125,7 @@ class Cylinder : public Shape
   bool intersect(const Ray& ray, float tmin, float tmax,
                  Intersection* intersection) const override;
   std::string name() const override {return "Cylinder";};
+  void transform(Mat4& view_matrix) override;
 };
 
 class Triangle : public Shape
@@ -149,4 +153,5 @@ class Triangle : public Shape
                  Intersection* intersection) const override;
   Vec2 interpolate_uv(const Intersection* hit_info) const override;
   std::string name() const override {return "Trigangle";};
+  void transform(Mat4& view_matrix) override;
 };

@@ -78,6 +78,11 @@ Vec2 Sphere::interpolate_uv(const Intersection* hit_info) const
   return {u, v};
 }
 
+void Sphere::transform(Mat4& view_matrix)
+{
+  center = center + view_matrix.translate();
+}
+
 Cylinder::Cylinder(Vec3 center, Vec3 axis, float radius, float height,
                    std::unique_ptr<Material> material)
     : Shape(std::move(material)), center(center), axis(axis), radius(radius),
@@ -214,6 +219,14 @@ Vec2 Cylinder::interpolate_uv(const Intersection* hit_info) const
   return {u, v};
 }
 
+void Cylinder::transform(Mat4& view_matrix)
+{
+  Vec3 new_axis = view_matrix * axis;
+  axis = new_axis;
+
+  center = center + view_matrix.translate();
+}
+
 Triangle::Triangle()
     : v0(Vec3()), v1(Vec3()), v2(Vec3()), Shape(std::unique_ptr<Material>())
 {
@@ -332,4 +345,17 @@ Vec2 Triangle::interpolate_uv(const Intersection* hit_info) const
       uv0.v * barycentric.x + uv1.v * barycentric.y + uv2.v * barycentric.z;
 
   return {u, v};
+}
+
+void Triangle::transform(Mat4& view_matrix)
+{
+  v0 = view_matrix * v0;
+  v1 = view_matrix * v1;
+  v2 = view_matrix * v2;
+
+  Vec3 translate = view_matrix.translate();
+  v0 = v0 + translate;
+  v1 = v1 + translate;
+  v2 = v2 + translate;
+
 }

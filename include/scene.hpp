@@ -28,4 +28,5 @@ class Scene
   bool object_in_shadow(Ray, std::shared_ptr<const Shape>, Intersection*);
   void build_bvh();
   bool intersect_bvh(Ray ray, Intersection& intersection);
+  void apply_transform(Mat4& view_matrix);
 };

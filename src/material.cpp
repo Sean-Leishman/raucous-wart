@@ -82,14 +82,11 @@ bool ReflectiveMaterial::scatter(Ray& ray, Intersection& hit_info,
   if (reflectivity > 0.9) {
     microfacet_normal = hit_info.normal;
   }
+
+
   Vec3 scatter_dir = Vec3::reflect(ray.direction, microfacet_normal);
   scattered = {hit_info.position + scatter_dir * 0.0001f, scatter_dir};
   Vec3 light_dir = scatter_dir;
-
-  if (reflectivity > 0.91) {
-    attenuation = Vec3{1.0f, 1.0f, 1.0f};
-    return true;
-  }
 
   attenuation = calculate_color(unit_dir, hit_info.normal, light_dir);
   return true;

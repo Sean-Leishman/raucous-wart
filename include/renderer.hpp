@@ -24,6 +24,7 @@ class Renderer
   int image_width;
   int image_height;
   int nbounces;
+  std::string input_render;
 
   PRenderHole camera;
   std::unique_ptr<Raytracer> raytracer;

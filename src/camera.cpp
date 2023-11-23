@@ -23,6 +23,8 @@ PRenderHole::PRenderHole()
   up = Vec3();
   forward = Vec3();
 
+  view_matrix = Mat4();
+
   defocus_angle = 0;
   focus_dist = 10;
   defocus_u = Vec3();
@@ -40,6 +42,14 @@ PRenderHole::PRenderHole(int width, int height, Vec3 position, Vec3 lookAt,
   forward = Vec3::normalize(position - lookAt);
   right = Vec3::normalize(upVector.cross(forward));
   up = forward.cross(right);
+
+  view_matrix = Mat4 {
+                           right.x, right.y, right.z, right.dot(position) * -1,
+                           up.x, up.y, up.z, up.dot(position) * -1,
+                           forward.x, forward.y, forward.z, forward.dot(position) * -1,
+                           0.0,       0.0,       0.0,       1.0
+                       };
+  transform_matrix = view_matrix.inverse();
 
   aspect = width / (float)height;
 
@@ -84,12 +94,13 @@ Ray PRenderHole::compute_ray(float s, float t)
 
   auto ray_origin = (defocus_angle <= 0) ? position : defocus_disk_sample();
   auto ray_direction = pixel_sample - ray_origin;
-
+  // auto ray_direction = pixel_sample;
  //  Vec3 ray_direction = right * half_width * s + up * half_width * t - forward;
 
   ray_direction = Vec3::normalize(ray_direction);
 
   return Ray{position, ray_direction};
+  // return Ray{position-position, ray_direction  + ray_origin};
 };
 
 

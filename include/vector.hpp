@@ -63,6 +63,15 @@ class Vec3
     return std::numeric_limits<float>::max();
   }
 
+  void set(char c, float v){
+    if (c == 'x')
+      x = v;
+    if (c == 'y')
+          y = v;
+    if (c == 'z')
+          z = v;
+  }
+
   Vec3 min(const Vec3& other) const
   {
     return {std::min(x, other.x), std::min(y, other.y), std::min(z, other.z)};
@@ -144,36 +153,14 @@ class Vec3
   };
 };
 
-class Mat3
-{
-  public:
-  std::array<std::array<float, 3>, 3> m;
 
-  Mat3()
-  {
-    for (int i = 0; i < 3; ++i)
-    {
-      for (int j = 0; j < 3; ++j)
-      {
-        m[i][j] = (i == j) ? 1.0f : 0.0f;
-      }
-    }
-  }
-
-  // Multiply a Vector3 by this matrix
-  Vec3 operator*(const Vec3& vec) const
-  {
-    return Vec3(m[0][0] * vec.x + m[0][1] * vec.y + m[0][2] * vec.z,
-                m[1][0] * vec.x + m[1][1] * vec.y + m[1][2] * vec.z,
-                m[2][0] * vec.x + m[2][1] * vec.y + m[2][2] * vec.z);
-  }
-};
 
 class Quaternion
 {
   public:
   float w, x, y, z;
 
+  Quaternion(){};
   Quaternion(float w, float x, float y, float z) : w(w), x(x), y(y), z(z){};
 
   Quaternion operator*(const Quaternion& q) const
@@ -216,3 +203,117 @@ inline Vec3 random_unit_vector()
   Vec3::normalize(v);
   return v;
 }
+
+class Mat4
+{
+  public:
+      float m[4][4];
+
+  Mat4(double d, double d1, double d2, float d3, double d4, double d5,
+       double d6, float d7, double d8, double d9, double d10, float d11,
+       double d12, double d13, double d14, double d15)
+      {
+        m[0][0] = d;
+        m[0][1] = d1;
+        m[0][2] = d2;
+        m[0][3] = d3;
+        m[1][0] = d4;
+        m[1][1] = d5;
+        m[1][2] = d6;
+        m[1][3] = d7;
+        m[2][0] = d8;
+        m[2][1] = d9;
+        m[2][2] = d10;
+        m[2][3] = d11;
+        m[3][0] = d12;
+        m[3][1] = d13;
+        m[3][2] = d14;
+        m[3][3]  = d15;
+      }
+
+
+  Mat4(){}
+
+  Mat4(float* v) {
+    for (int i=0; i < 4; ++i){
+      for (int j=0; j<4; ++j){
+        m[i][j] = v[(i * 4) + j];
+      }
+    }
+  }
+
+  Mat4 operator*(const float& v) {
+    float mat[16];
+
+    for (int i=0; i < 4; ++i){
+      for (int j=0; j<4; ++j){
+        mat[i * 4 + j] = m[i][j] * -1;
+      }
+    }
+    return {mat};
+  }
+
+  Vec3 operator*(Vec3 v)
+  {
+    Vec3 result;
+    char* axis = "xyz";
+
+    for (int i = 0; i < 3; ++i)
+    {
+      float sum = 0;
+      for (int j = 0; j < 3; ++j)
+      {
+
+        sum = sum + v.get(axis[j]) + m[i][j];
+      }
+      sum = sum + m[i][3];
+      result.set(axis[i], sum);
+    }
+    return result;
+  }
+
+  void set(int x, int y, float val) {
+    m[x][y] = val;
+  }
+
+  Mat4 transpose() {
+    Mat4 t;
+    for (int i=0; i < 4; ++i){
+      for (int j=0; j<4; ++j){
+        t.set(i, j, m[j][i]);
+      }
+    }
+    return t;
+  }
+
+  Vec3 translate(){
+    return Vec3{m[0][3], m[1][3], m[2][3]};
+  }
+
+  Mat4 inverse(){
+    Mat4 inv;
+    Mat4 r_t = transpose();
+
+    // Inverse translation
+    Vec3 inverseTranslation = r_t * -1 * translate();
+
+  // Set the rotation part
+  for (int i = 0; i < 3; ++i) {
+    for (int j = 0; j < 3; ++j) {
+      inv.m[i][j] = r_t.m[i][j];
+    }
+    }
+
+    // Set the translation part
+    inv.m[0][3] = inverseTranslation.x;
+    inv.m[1][3] = inverseTranslation.y;
+    inv.m[2][3] = inverseTranslation.z;
+
+    // Set the last row
+    inv.m[3][0] = inv.m[3][1] = inv.m[3][2] = 0;
+    inv.m[3][3] = 1;
+
+    return inv;
+  }
+
+};

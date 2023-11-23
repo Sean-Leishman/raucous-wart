@@ -46,6 +46,8 @@ class PRenderHole : public Camera
 
 
   public:
+      Mat4 view_matrix;
+      Mat4 transform_matrix;
       bool defocus;
 
       PRenderHole();
@@ -74,4 +76,5 @@ class PRenderHole : public Camera
     return (defocus_u * p.x) + (defocus_v * p.y);
 
   }
+
 };

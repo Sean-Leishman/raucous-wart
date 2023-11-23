@@ -20,6 +20,7 @@ class Light{
 
     virtual float compute_intensity(float) = 0;
     virtual Vec3 get_position() = 0;
+    virtual void transform(Mat4&) = 0;
 };
 
 class PointLight: public Light {
@@ -29,6 +30,7 @@ public:
     PointLight(Vec3 position, Vec3 intensity);
     float compute_intensity(float) override;
     Vec3 get_position() override;
+    void transform(Mat4&) override;
 };
 
 class AmbientLight: public Light {
@@ -38,6 +40,7 @@ public:
     AmbientLight(Vec3 intensity, PPMColor color);
     float compute_intensity(float) override;
     Vec3 get_position() override;
+    void transform(Mat4&) override;
 };
 
 class AreaLight: public Light{
@@ -52,4 +55,5 @@ public:
 
     float compute_intensity(float) override;
     Vec3 get_position() override;
+    void transform(Mat4&) override;
 };
