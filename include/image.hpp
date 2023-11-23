@@ -30,7 +30,7 @@ class PPMColor
 
   friend std::ostream& operator<<(std::ostream& out, PPMColor& v)
   {
-    out << v.r * 255 << " " << v.g * 255 << " " << v.b * 255;
+    out << (int) round(v.r * 255) << " " << (int) round(v.g * 255) << " " << (int) round(v.b * 256);
     return out;
   }
 

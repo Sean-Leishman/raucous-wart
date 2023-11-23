@@ -126,11 +126,17 @@ void Renderer::load_lights(nlohmann::json lights)
 
       auto light = AreaLight(position, intensity, normal, size);
       new_light = std::make_shared<AreaLight>(light);
-      std::unique_ptr<Material> mat =
-          std::make_unique<EmissiveMaterial>(DiffuseMaterial(), light);
-      new_shape = std::make_shared<Sphere>(Vec3{position}, size[0] * 0.1,
-                                           std::move(mat));
-      scene.shapes.push_back(new_shape);
+
+      if (input_render == "pathtracer") {
+          std::unique_ptr<Material> mat =
+                  std::make_unique<EmissiveMaterial>(DiffuseMaterial(), light);
+          new_shape = std::make_shared<Sphere>(Vec3{position}, size[0] * 0.1,
+                                               std::move(mat));
+          scene.shapes.push_back(new_shape);
+      }
+      else {
+          scene.lights.push_back(new_light);
+      }
     }
   }
 }
@@ -198,7 +204,7 @@ int Renderer::load_file(const std::string& filename)
   path += filename;
   parser.read_file(path.string());
 
-  auto input_render = parser.get<std::string>("rendermode");
+  input_render = parser.get<std::string>("rendermode");
 
   image_width = parser.get<int>("camera", "width");
   image_height = parser.get<int>("camera", "height");
@@ -249,6 +255,9 @@ int Renderer::load_file(const std::string& filename)
   {
     throw std::runtime_error("Raytracer not initialised");
   }
+
+ // scene.apply_transform(camera.transform_matrix);
+
 
   return 0;
 }
