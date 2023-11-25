@@ -19,7 +19,6 @@ class PRenderHole : public Camera
   Vec3 lookAt;
   Vec3 upVector;
   float fov;
-  float exposure;
 
   float defocus_angle;
   float focus_dist;
@@ -46,11 +45,12 @@ class PRenderHole : public Camera
 
 
   public:
-      Mat4 view_matrix;
-      Mat4 transform_matrix;
-      bool defocus;
+      float exposure;
+  Mat4 view_matrix;
+  Mat4 transform_matrix;
+  bool defocus;
 
-      PRenderHole();
+  PRenderHole();
   PRenderHole(int, int, Vec3, Vec3, Vec3, float, float);
 
 

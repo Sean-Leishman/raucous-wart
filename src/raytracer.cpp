@@ -24,8 +24,8 @@ PPMColor PhongRaytracer::trace_ray(float x, float y)
   Ray ray = camera->compute_ray(x, y);
   Intersection hit_info;
   PPMColor final{trace_ray(ray, 0, hit_info)};
-  final.clamp();
-  final = final.gamma_correct();
+   final.clamp();
+// final = final.gamma_correct();
   return final;
 }
 
@@ -37,7 +37,7 @@ Vec3 PhongRaytracer::trace_ray(Ray& ray, int depth, Intersection& hit_info)
   }
   Vec3 color;
 
-  if (!scene->intersect_bvh(ray, hit_info))
+  if (!scene->intersect(ray, hit_info))
   {
     return scene->bg_color.to_vec();
   }
@@ -187,7 +187,7 @@ PPMColor Pathtracer::trace_ray(float x, float y)
   final_color = final_color / n_samples;
   PPMColor color{final_color};
   color.clamp();
- // color = color.gamma_correct();
+  // color = color.gamma_correct();
   return color;
 }
 

@@ -38,7 +38,7 @@ class Vec3
 
   Vec3 operator+(const float& v) const { return Vec3(x + v, y + v, z + v); }
   Vec3 operator/(const float c) const { return Vec3(x / c, y / c, z / c); }
-
+  Vec3 operator/(const Vec3 c) const { return Vec3(x / c.x, y / c.y, z / c.z); }
   friend std::ostream& operator<<(std::ostream& out, const Vec3& v)
   {
     out << "(" << v.x << "," << v.y << "," << v.z << ")";

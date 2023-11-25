@@ -12,7 +12,9 @@
 
 void Renderer::render_frame(std::string save_file)
 {
+  std::cout << "render" << std::endl;
   scene.build_bvh();
+  std::cout << "built tree" << std::endl;
 
 #pragma omp parallel for
   for (int x = 0; x < image_width; ++x)

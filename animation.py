@@ -1,6 +1,4 @@
 import os
-import glob
-import cv2
 import json
 import math
 import subprocess
@@ -158,8 +156,8 @@ def load_shapes(index, positions, frames):
 def load_camera(index, positions, rotations):
     camera = {
         "type": "pinhole",
-        "width": 1200,
-        "height": 800,
+        "width": 800,
+        "height": 600,
         "position": positions,
         "lookAt": rotations,
         "upVector": [0, 1, 0],
@@ -175,23 +173,20 @@ def load_light():
         light_positions[light_index[1]]
     ]
 
-    positions[0][1] += 0.5
-    positions[1][1] -= 0.5
-
     lights = [
         {
             "type": "arealight",
             "normal": [0, 1, 0],
             "size": [2, 4, 0],
             "position": positions[0],
-            "intensity": [3, 3, 3]
+            "intensity": [10, 10, 10]
         },
         {
             "type": "arealight",
             "normal": [0, 1, 0],
             "size": [2, 4, 0],
             "position": positions[1],
-            "intensity": [3, 3, 3]
+            "intensity": [10, 10, 10]
         },
     ]
     return lights
@@ -231,7 +226,7 @@ def camera_position(radius, frame, num_frames):
 
 # Parameters
 num_frames = 100
-a = 1  # Scale of the lemniscate
+a = 5  # Scale of the lemniscate
 initial_height = 50  # Initial height of the object
 
 # Generate positions
@@ -243,13 +238,13 @@ positions = [i for i in range(len(figure_8)) if i % NUM_SPHERES == 0]
 camera_positions = [-1.0, 0.5, -1.5]
 camera_rotations = [0 - i for i in [-1, 0.5, -1.5]]
 
-light_positions = [[x * 0.05, 0, 1] for x in range(-50, 50)]
+light_positions = [[x * 0.05, 1, 1] for x in range(-50, 50)]
 light_index = [0, 50]
 
 for frame in range(num_frames):
     curr_frame = {}
     curr_frame['nbounces'] = 6
-    curr_frame['nsamples'] = 5000
+    curr_frame['nsamples'] = 500
     curr_frame['rendermode'] = 'pathtracer'
     position, look_at = camera_position(5, frame, 100)
     curr_frame['camera'] = load_camera(frame, position, look_at)
@@ -270,5 +265,5 @@ for frame in range(num_frames):
         ["./cmake-build-release/main", filename[1:], out[1:]])
 
 filename = f'./materials/Animation/video.mp4'
-os.system(f'ffmpeg -i "./materials/Animation/Image/frame_%03d.ppm" -framerate 10 -c:v libx264 -crf 25 -vf "scale=500: 500, format=yuv420p" -movflags +faststart {filename}'
+os.system(f'ffmpeg -framerate 10 -i "./materials/Animation/Image/frame_%03d.ppm" -c:v libx264 -crf 25 -vf "scale=500: 500, format=yuv420p" -movflags +faststart {filename}'
           )

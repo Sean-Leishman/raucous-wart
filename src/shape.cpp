@@ -109,24 +109,31 @@ bool Cylinder::intersect_caps(const Vec3& origin, const Vec3& direction,
     return false;
   }
   float half_height = height;
-  float tt = (half_height - origin.y) / direction.y;
-  if (tt < 0)
+  float tt = (-height - origin.y) / direction.y;
+  if (tt > 0)
   {
-    tt = (half_height + origin.y) / direction.y;
-  }
-  if (tt < 0)
-  {
-    return false;
+    Vec3 p = origin + direction * tt;
+    if (p.x * p.x + p.z * p.z <= radius * radius)
+    {
+      intersection->position = p;
+      intersection->distance = tt;
+      intersection->normal =
+          (p.y > center.y) ? Vec3(0.0f, 1.0f, 0.0f) : Vec3(0.0f, -1.0f, 0.0f);
+      return true;
+    }
   }
 
-  Vec3 p = origin + direction * tt;
-  if (p.x * p.x + p.z * p.z <= radius * radius)
-  {
-    intersection->position = p;
-    intersection->distance = t;
-    intersection->normal =
-        (p.y > center.y) ? Vec3(0.0f, 1.0f, 0.0f) : Vec3(0.0f, -1.0f, 0.0f);
-    return true;
+  tt = (height - origin.y) / direction.y;
+  if (tt >= 0){
+    Vec3 p = origin + direction * tt;
+    if (p.x * p.x + p.z * p.z <= radius * radius)
+    {
+      intersection->position = p;
+      intersection->distance = tt;
+      intersection->normal =
+          (p.y > center.y) ? Vec3(0.0f, 1.0f, 0.0f) : Vec3(0.0f, -1.0f, 0.0f);
+      return true;
+    }
   }
   return false;
 }
@@ -159,17 +166,14 @@ bool Cylinder::intersect(const Ray& ray, float tmin, float tmax,
   {
     t = t2;
     if (t < tmin || t > tmax)
-    {
-      bool intersect = intersect_caps(oc, dir, t, intersection);
+    {bool intersect = intersect_caps(oc, dir, t, intersection);
       if (!intersect)
         return false;
-
       intersection->position =
           rotate_vector(intersection->position, rotation) + center;
       intersection->normal = rotate_vector(intersection->normal, rotation);
       intersection->object = get_shared_ptr();
-      intersection->type = CAPS;
-
+      intersection->distance = t;
       return true; // Both intersection points are out of bounds
     }
   }
@@ -315,8 +319,8 @@ Vec2 Triangle::get_uv(const Vec3& point) const
     num1 = point.y - min_y;
   };
 
-  float u = num1 / den1;
-  float v = num2 / den2;
+  float u = (point.x - min_x) / (max_x - min_x);
+  float v = (point.z - min_z) / (max_z - min_z);
 
   return {u, v};
 }

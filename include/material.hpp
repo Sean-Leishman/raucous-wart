@@ -72,7 +72,7 @@ class ReflectiveMaterial : public Material
   float geometrySchlickGGX(float NdotV) const;
 
   public:
-  ReflectiveMaterial(): roughness(0.1f), metallic(0.1f){};
+  ReflectiveMaterial(): roughness(0.5f), metallic(0.1f){};
   ReflectiveMaterial(const Material& mat);
   bool scatter(Ray& ray, Intersection& hit_info, Vec3& attenuation,
                Ray& scattered) override;

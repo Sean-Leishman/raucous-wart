@@ -79,11 +79,28 @@ class PPMColor
     g = std::min(1.0f, g);
     b = std::min(1.0f, b);
     */
-    PPMColor den = PPMColor{r/(r+1.0f), g/(g+1.0f), b/(b+1.0f)};
+    Vec3 v = Vec3{r,g,b};
+    float max_white2 = 10 * 10;
+    Vec3 num = v * ((v / Vec3{max_white2, max_white2, max_white2}) + 1.0f);
+    num = num / (v + 1.0f);
+    PPMColor den = PPMColor{num};
     // Scale for displayable range
     r = den.r;
     g = den.g;
     b = den.b;
+  }
+
+  void clamp(float exposure)
+  {
+    auto hdCurve = [exposure](float x) {
+      return (1.0f / (1.0f + exp(-exposure * (x - 0.5f))));
+    };
+
+    PPMColor ldrColor;
+    r = hdCurve(r);
+    g = hdCurve(g);
+    b = hdCurve(b);
+
   }
 
   PPMColor gamma_correct(){

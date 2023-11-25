@@ -14,9 +14,7 @@ set(CMAKE_CXX_FLAGS_RELEASE "-O3 -march=native -fopenmp -ffast-math")
 
 add_subdirectory(src)
 
-add_executable(main main.cpp
-        include/transform.hpp
-)
+add_executable(main main.cpp)
 target_compile_features(main PRIVATE cxx_std_17)
 #target_compile_options(main PRIVATE -fno-omit-frame-pointer -fsanitize=address)
 

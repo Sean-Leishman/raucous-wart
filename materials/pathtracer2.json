@@ -5,8 +5,8 @@
   "camera":
   {
     "type":"pinhole",
-    "width": 600,
-    "height":400,
+    "width": 1200,
+    "height":600,
     "position":[-1, 0.5, -1.5],
     "lookAt":[0.25, -0.05, 1.0],
     "upVector":[0.0, 1.0, 0.0],
@@ -22,14 +22,14 @@
       "position":[0, 2, 0],
       "normal": [0, -0.3, -0.1],
       "size": [2,4,0],
-      "intensity":[10, 10, 10]
+      "intensity":[40, 40, 40]
       },
       {
         "type":"arealight",
         "position":[0, 2, 1],
         "normal": [0, -0.3, -0.1],
         "size": [2,4,0],
-        "intensity":[10, 10, 10]
+        "intensity":[40, 40, 40]
       },
       {
         "type":"pointlight",
@@ -50,9 +50,9 @@
           "diffusecolor":[1.0, 0.0, 0.0],
           "specularcolor":[1.0,0,0],
           "isreflective":true,
-          "reflectivity":0.9,
+          "reflectivity":0.4,
           "isrefractive":false,
-          "refractiveindex":1.5
+          "refractiveindex":1.2
         }
       },
       {
@@ -100,9 +100,9 @@
           "ks":0.1,
           "kd":0.9,
           "specularexponent":20,
-          "diffusecolor":[1.0, 1.0, 1.0],
+          "diffusecolor":[1.0, 0.5, 1.0],
           "specularcolor":[1.0,0.0,0.0],
-          "isreflective":true,
+          "isreflective":false,
           "reflectivity":0.95,
           "isrefractive":false,
           "refractiveindex":1.0
@@ -157,7 +157,7 @@
           "diffusecolor":[0.5, 0.8, 0.5],
           "specularcolor":[1.0,1.0,1.0],
           "isreflective":true,
-          "reflectivity":0.95,
+          "reflectivity":0.89,
           "isrefractive":false,
           "refractiveindex":1.0
         }
@@ -175,7 +175,7 @@
           "diffusecolor":[0.5, 0.8, 0.5],
           "specularcolor":[1.0,1.0,1.0],
           "isreflective":true,
-          "reflectivity":0.95,
+          "reflectivity":0.89,
           "isrefractive":false,
           "refractiveindex":1.0
         }

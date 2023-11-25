@@ -20,13 +20,8 @@
                     "type":"pointlight", 
                     "position":[0, 1.0, 0.5], 
                     "intensity":[0.75, 0.75, 0.75] 
-                },
-                {
-                    "type":"ambientlight",
-                    "intensity":[0.25, 0.25, 0.25],
-                    "color": [1,1,1]
                 }
-            ], 
+            ],
             "shapes":[ 
                 { 
                     "type":"sphere", 
@@ -41,7 +36,7 @@
                             "specularcolor":[1.0,1.0,1.0],
                             "isreflective":false,
                             "reflectivity":1.0,
-                            "isrefractive":true,
+                            "isrefractive":false,
                             "refractiveindex":1.2
                         }
                 },
@@ -60,7 +55,7 @@
                             "specularcolor":[1.0,1.0,1.0],
                             "isreflective":false,
                             "reflectivity":1.0,
-                            "isrefractive":true,
+                            "isrefractive":false,
                             "refractiveindex":1.5
                         }
                 },

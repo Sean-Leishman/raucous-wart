@@ -129,7 +129,7 @@ Vec3 ReflectiveMaterial::calculate_color(Vec3& view_dir, Vec3& normal,
 
   float r0 = reflectivity;
   Vec3 F0 = Vec3{r0, r0, r0};
- // F0 = Vec3::mix(F0, albedo, metallic);
+  F0 = Vec3::mix(F0, albedo, 0.1);
   Vec3 F = fresnelSchlick(HdotV, F0);
 
   float D = ggxNDF(half_vector, normal);

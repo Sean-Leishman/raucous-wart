@@ -39,11 +39,11 @@
           "specularexponent":20,
           "diffusecolor":[0.8, 0.5, 0.5],
           "specularcolor":[1.0,1.0,1.0],
-          "isreflective":true,
+          "isreflective":false,
           "reflectivity":0.9,
           "isrefractive":false,
           "refractiveindex":1.0,
-          "texture":"/materials/vwvwvw.ppm"
+          "texture":"/materials/earth.ppm"
         }
       },
       {
@@ -76,11 +76,11 @@
           "specularexponent":20,
           "diffusecolor":[0.5, 0.5, 0.8],
           "specularcolor":[1.0,1.0,1.0],
-          "isreflective":true,
+          "isreflective":false,
           "reflectivity":0.5,
           "isrefractive":false,
           "refractiveindex":1.0,
-          "texture":"/materials/earth.ppm"
+          "texture":"/materials/spots.ppm"
         }
       },
       {
