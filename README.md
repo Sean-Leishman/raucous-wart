@@ -8,4 +8,4 @@ This version has been tested on linux and works on wsl2 but the version has only
 
 A Makefile is available so run `make` and the main executable should build within the directory.
 
-![][https://github.com/Sean-Leishman/raucous_wart/blob/master/materials/Images/Path1000.png?raw=true]
+![Pathtracer][https://github.com/Sean-Leishman/raucous_wart/blob/master/materials/Images/Path1000.png?raw=true]
