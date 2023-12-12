@@ -7,3 +7,5 @@ The `main` excecutable requires two arguments, namely the input json and the out
 This version has been tested on linux and works on wsl2 but the version has only been tested with CMake rather than a MakeFile. As such, I hope you have CMake but if not a MakeFile is also provided that might work :)
 
 A Makefile is available so run `make` and the main executable should build within the directory.
+
+![][https://github.com/Sean-Leishman/raucous_wart/blob/master/materials/Images/Path1000.png?raw=true]
